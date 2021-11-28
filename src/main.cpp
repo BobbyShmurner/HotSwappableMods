@@ -1,11 +1,13 @@
 #include "main.hpp"
 #include "Utils/JNIUtils.hpp"
 #include "DataTypes/PublicMod.hpp"
+#include "ViewControllers/MainViewController.hpp"
 
 #include <dlfcn.h>
 #include <string.h>
 #include <dirent.h>
-#include <stdio.h>
+
+#include "questui/shared/QuestUI.hpp"
 
 #include "modloader\shared\modloader.hpp"
 
@@ -146,23 +148,27 @@ extern "C" void load() {
     INSTALL_HOOK(getLogger(), testHookOfPureGamer);
     getLogger().info("Installed all hooks!");
 
-    std::string modPath = string_format("/sdcard/Android/data/%s/files/mods/", Modloader::getApplicationId().c_str());
-    getLogger().info("Mod Path: %s", modPath.c_str());
+    getLogger().info("Setting Up QuestUI...");
+    QuestUI::Init();
+    QuestUI::Register::RegisterMainMenuModSettingsViewController<HotSwappableMods::MainViewController*>(modInfo);
+    getLogger().info("Setup QuestUI!");
 
-    DIR* dir = opendir(modPath.c_str());
-    dirent* dp;
-    if (dir == nullptr) {
-        getLogger().info("Couldnt open the mod dir \"%s\"", modPath.c_str());
-    } else {
-        while ((dp = readdir(dir)) != NULL) {
-            if (!strcmp(dp->d_name, "libBetterSaberQolors.so")) {
-                rename(string_format("%s/%s", modPath.c_str(), dp->d_name).c_str(), string_format("%s/%s", modPath.c_str(), "libBetterSaberQolors.disabled").c_str());
-                getLogger().info("Renamed \"%s\" To Dissabled", dp->d_name);
-            } else if (!strcmp(dp->d_name, "libBetterSaberQolors.disabled")) {
-                rename(string_format("%s/%s", modPath.c_str(), dp->d_name).c_str(), string_format("%s/%s", modPath.c_str(), "libBetterSaberQolors.so").c_str());
-                getLogger().info("Renamed \"%s\" To Enabled", dp->d_name);
-            }
-        }
-        closedir(dir);
-    }
+    // std::string modPath = string_format("/sdcard/Android/data/%s/files/mods/", Modloader::getApplicationId().c_str());
+
+    // DIR* dir = opendir(modPath.c_str());
+    // dirent* dp;
+    // if (dir == nullptr) {
+    //     getLogger().info("Couldnt open the mod dir \"%s\"", modPath.c_str());
+    // } else {
+    //     while ((dp = readdir(dir)) != NULL) {
+    //         if (!strcmp(dp->d_name, "libBetterSaberQolors.so")) {
+    //             rename(string_format("%s/%s", modPath.c_str(), dp->d_name).c_str(), string_format("%s/%s", modPath.c_str(), "libBetterSaberQolors.disabled").c_str());
+    //             getLogger().info("Renamed \"%s\" To Dissabled", dp->d_name);
+    //         } else if (!strcmp(dp->d_name, "libBetterSaberQolors.disabled")) {
+    //             rename(string_format("%s/%s", modPath.c_str(), dp->d_name).c_str(), string_format("%s/%s", modPath.c_str(), "libBetterSaberQolors.so").c_str());
+    //             getLogger().info("Renamed \"%s\" To Enabled", dp->d_name);
+    //         }
+    //     }
+    //     closedir(dir);
+    // }
 }
