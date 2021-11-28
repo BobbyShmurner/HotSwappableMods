@@ -1,0 +1,15 @@
+{
+  "_QPVersion": "0.1.1",
+  "name": "Hot-Swappable Mods",
+  "id": "HotSwappableMods",
+  "author": "Bobby Shmurner",
+  "version": "0.1.0",
+  "packageId": "com.beatgames.beatsaber",
+  "packageVersion": "1.17.1",
+  "description": "Allows you to enable and disable your mods from in game!",
+  "coverImage": "cover.png",
+  "dependencies": [],
+  "modFiles": [],
+  "libraryFiles": [],
+  "fileCopies": []
+}
