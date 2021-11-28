@@ -12,6 +12,7 @@
         "${workspaceFolder}/shared",
         "${workspaceFolder}/include",
         "${workspaceFolder}/extern/**",
+        "${workspaceFolder}/extern/includes/**",
         "${workspaceFolder}/extern/libil2cpp/il2cpp/libil2cpp",
         "C:/Android/andriod-ndk/**"
       ],

@@ -1,6 +1,6 @@
 #include "main.hpp"
-#include "JNIUtils.hpp"
-#include "PublicMod.hpp"
+#include "Utils/JNIUtils.hpp"
+#include "DataTypes/PublicMod.hpp"
 
 #include <dlfcn.h>
 #include <string.h>
