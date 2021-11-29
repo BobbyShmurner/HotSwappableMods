@@ -126,12 +126,6 @@ void RestartBS() {
     CALL_STATIC_VOID_METHOD(env, processClass, killProcess, "(I)V", pid);
 }
 
-MAKE_HOOK_MATCH(testHookOfPureGamer, &GlobalNamespace::NoteController::Init, void, GlobalNamespace::NoteController* self, GlobalNamespace::NoteData* noteData, float worldRotation, UnityEngine::Vector3 moveStartPos, UnityEngine::Vector3 moveEndPos, UnityEngine::Vector3 jumpEndPos, float moveDuration, float jumpDuration, float jumpGravity, float endRotation, float uniformScale) {
-    testHookOfPureGamer(self, noteData, worldRotation, moveStartPos, moveEndPos, jumpEndPos, moveDuration, jumpDuration,  jumpGravity, endRotation, uniformScale);
-    
-    RestartBS();
-}
-
 void __attribute__((constructor)) DlOpened() {
     __android_log_print(ANDROID_LOG_VERBOSE, "HotSwappableMods", "Getting JVM");
     CacheJVM();
@@ -145,7 +139,6 @@ extern "C" void load() {
     il2cpp_functions::Init();
 
     getLogger().info("Installing hooks...");
-    INSTALL_HOOK(getLogger(), testHookOfPureGamer);
     getLogger().info("Installed all hooks!");
 
     getLogger().info("Setting Up QuestUI...");
