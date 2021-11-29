@@ -5,20 +5,10 @@
 #include <string>
 #include <dirent.h>
 
+#include "beatsaber-hook/shared/utils/il2cpp-functions.hpp"
+
 namespace DirUtils {
-	std::list<std::string> GetDirContents(const char* dirPath) {
-		DIR* dir = opendir(dirPath);
-		dirent* dp;
-        std::list<std::string> files; 
-
-		if (dir == nullptr) return files;
-
-        while ((dp = readdir(dir)) != NULL) {
-            if (strlen(dp->d_name) > 3) {
-                files.emplace_front(std::string(dp->d_name));
-            }
-        }
-
-        return files;
-	}
+	std::list<std::string> GetDirContents(const char* dirPath);
+    void ToggleMod(std::string modName);
+    void SetModsActive(std::list<std::string>* mods);
 }

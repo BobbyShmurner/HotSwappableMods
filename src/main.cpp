@@ -1,11 +1,13 @@
 #include "main.hpp"
 #include "Utils/JNIUtils.hpp"
+#include "Utils/DirUtils.hpp"
 #include "DataTypes/PublicMod.hpp"
 #include "ViewControllers/MainViewController.hpp"
 
 #include <dlfcn.h>
 #include <string.h>
 #include <dirent.h>
+#include <list>
 
 #include "questui/shared/QuestUI.hpp"
 
@@ -14,10 +16,12 @@
 #include "custom-types/shared/coroutine.hpp"
 
 #include "UnityEngine/WaitForEndOfFrame.hpp"
-
+#include "UnityEngine/UI/Button.hpp"
 #include "UnityEngine/AndroidJNIHelper.hpp"
 #include "UnityEngine/AndroidJavaClass.hpp"
 #include "UnityEngine/AndroidJavaObject.hpp"
+
+#include "HMUI/NoTransitionsButton.hpp"
 
 #include "GlobalNamespace/MainMenuViewController.hpp"
 #include "GlobalNamespace/NoteController.hpp"
@@ -26,6 +30,9 @@
 static ModInfo modInfo; // Stores the ID and version of our mod, and is sent to the modloader upon startup
 
 static JavaVM* jvm;
+
+extern HMUI::NoTransitionsButton* BackButton;
+extern std::list<std::string>* modsToToggle;
 
 // Loads the config from disk using our modInfo, then returns it for use
 Configuration& getConfig() {
@@ -126,6 +133,24 @@ void RestartBS() {
     CALL_STATIC_VOID_METHOD(env, processClass, killProcess, "(I)V", pid);
 }
 
+// Used for restart test
+MAKE_HOOK_MATCH(RestartTest, &GlobalNamespace::MainMenuViewController::DidActivate, void, GlobalNamespace::MainMenuViewController* self, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
+    RestartTest(self, firstActivation, addedToHierarchy, screenSystemEnabling);
+
+    RestartBS();
+}
+
+MAKE_HOOK_MATCH(OnBackButton, &UnityEngine::UI::Button::Press, void, UnityEngine::UI::Button* self) {
+    OnBackButton(self);
+
+    getLogger().info("Button Pressed!");
+    if (((UnityEngine::UI::Button*)BackButton) == self) {
+        if (modsToToggle->size() == 0) return;
+        DirUtils::SetModsActive(modsToToggle);
+        RestartBS();
+    }
+}
+
 void __attribute__((constructor)) DlOpened() {
     __android_log_print(ANDROID_LOG_VERBOSE, "HotSwappableMods", "Getting JVM");
     CacheJVM();
@@ -139,6 +164,7 @@ extern "C" void load() {
     il2cpp_functions::Init();
 
     getLogger().info("Installing hooks...");
+    INSTALL_HOOK(getLogger(), OnBackButton);
     getLogger().info("Installed all hooks!");
 
     getLogger().info("Setting Up QuestUI...");
