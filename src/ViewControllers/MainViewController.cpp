@@ -60,6 +60,8 @@ void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<st
 }
 
 void PopulateModsEnabledMap (std::unordered_map<std::string, bool>* map) {
+	map->clear();
+
 	for (std::string fileName : ModUtils::GetDirContents("/sdcard/Android/data/com.beatgames.beatsaber/files/mods/")) {
 		if (!ModUtils::IsFileName(fileName)) continue;
 
@@ -71,10 +73,12 @@ void PopulateModsEnabledMap (std::unordered_map<std::string, bool>* map) {
 void HotSwappableMods::MainViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
 	BackButton = GameObject::Find(il2cpp_utils::newcsstr("BackButton"))->GetComponent<HMUI::NoTransitionsButton*>();
 
+	ModUtils::GetOddLibNames();
+	PopulateModsEnabledMap(modsEnabled);
+
 	if (!firstActivation) return;
 
 	UnityEngine::GameObject* mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
-	PopulateModsEnabledMap(modsEnabled);
 
 	QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Mod List", false);
 

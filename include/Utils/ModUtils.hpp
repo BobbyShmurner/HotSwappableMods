@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <dirent.h>
+#include <algorithm>
 
 #include "beatsaber-hook/shared/utils/il2cpp-functions.hpp"
 
@@ -14,7 +15,10 @@ namespace ModUtils {
     void ToggleMod(std::string modName);
     void SetModsActive(std::list<std::string>* mods);
 
+    void GetOddLibNames();
+
     bool IsDisabled(std::string name);
+    bool IsOddLibName(std::string name);
 
     // Mod Name = modname
     // Lib Name = libmodname
