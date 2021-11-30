@@ -37,6 +37,11 @@
       "id": "questui",
       "versionRange": "*",
       "additionalData": {}
+    },
+    {
+      "id": "config-utils",
+      "versionRange": "*",
+      "additionalData": {}
     }
   ],
   "additionalData": {}

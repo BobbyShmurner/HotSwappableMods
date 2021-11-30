@@ -20,6 +20,8 @@ namespace ModUtils {
     bool IsDisabled(std::string name);
     bool IsOddLibName(std::string name);
 
+    void UpdateAlwaysDisplayLibNames(bool value);
+
     // Mod Display Name = Mod Name
     // Mod Name = modname
     // Lib Name = libmodname

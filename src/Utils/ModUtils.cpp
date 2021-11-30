@@ -1,8 +1,9 @@
 #include "Utils/ModUtils.hpp"
+#include "DataTypes/MainConfig.hpp"
 #include "main.hpp"
 
 namespace ModUtils {
-	const char* modPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
+	const char* ModPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
 	std::list<std::string>* OddLibNames = new std::list<std::string>();
 
 	bool AlwaysDisplayLibNames = false;
@@ -24,7 +25,7 @@ namespace ModUtils {
 	}
 
 	std::string GetFileNameFromDir(std::string libName) {
-		std::list<std::string> modFileNames = GetDirContents(modPath);
+		std::list<std::string> modFileNames = GetDirContents(ModPath);
 
 		for (std::string modFileName : modFileNames) {
 			if (!strcmp(GetLibName(modFileName).c_str(), libName.c_str())) return modFileName;
@@ -34,14 +35,14 @@ namespace ModUtils {
 	}
 
 	void ToggleMod(std::string modName) {
-		std::list<std::string> modFileNames = GetDirContents(modPath);
+		std::list<std::string> modFileNames = GetDirContents(ModPath);
 
 		for (std::string modFileName : modFileNames) {
 			if (!IsFileName(modFileName)) continue;
 			if (strcmp(modFileName.c_str(), GetFileName(modName).c_str())) continue;
 
-			if (IsDisabled(modFileName)) rename(string_format("%s/%s", modPath, modFileName.c_str()).c_str(), string_format("%s/%s.so", modPath, GetLibName(modName).c_str()).c_str());
-			else rename(string_format("%s/%s", modPath, modFileName.c_str()).c_str(), string_format("%s/%s.disabled", modPath, GetLibName(modName).c_str()).c_str());
+			if (IsDisabled(modFileName)) rename(string_format("%s/%s", ModPath, modFileName.c_str()).c_str(), string_format("%s/%s.so", ModPath, GetLibName(modName).c_str()).c_str());
+			else rename(string_format("%s/%s", ModPath, modFileName.c_str()).c_str(), string_format("%s/%s.disabled", ModPath, GetLibName(modName).c_str()).c_str());
 		}
 	}
 
@@ -57,7 +58,7 @@ namespace ModUtils {
 
     void GetOddLibNames() {
 		OddLibNames->clear();
-		std::list<std::string> modFileNames = GetDirContents(modPath);
+		std::list<std::string> modFileNames = GetDirContents(ModPath);
 
 		for (std::string modFileName : modFileNames) {
 			if (!IsFileName(modFileName)) continue;
@@ -79,6 +80,11 @@ namespace ModUtils {
 
 	bool IsOddLibName(std::string name) {
 		return (std::find(OddLibNames->begin(), OddLibNames->end(), name) != OddLibNames->end());
+	}
+
+	void UpdateAlwaysDisplayLibNames(bool value) {
+		AlwaysDisplayLibNames = value;
+		getMainConfig().AlwaysShowFileNames.SetValue(value);
 	}
 
     // Mod Display Name = Mod Name
