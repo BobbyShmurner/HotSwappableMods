@@ -1,6 +1,6 @@
 #include "main.hpp"
 #include "Utils/JNIUtils.hpp"
-#include "Utils/DirUtils.hpp"
+#include "Utils/ModUtils.hpp"
 #include "DataTypes/PublicMod.hpp"
 #include "ViewControllers/MainViewController.hpp"
 
@@ -146,7 +146,7 @@ MAKE_HOOK_MATCH(OnBackButton, &UnityEngine::UI::Button::Press, void, UnityEngine
     getLogger().info("Button Pressed!");
     if (((UnityEngine::UI::Button*)BackButton) == self) {
         if (modsToToggle->size() == 0) return;
-        DirUtils::SetModsActive(modsToToggle);
+        ModUtils::SetModsActive(modsToToggle);
         RestartBS();
     }
 }

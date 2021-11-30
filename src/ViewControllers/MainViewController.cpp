@@ -1,6 +1,6 @@
 #include "ViewControllers/MainViewController.hpp"
 
-#include "Utils/DirUtils.hpp"
+#include "Utils/ModUtils.hpp"
 
 #include "UnityEngine/RectOffset.hpp"
 #include "UnityEngine/RectTransform.hpp"
@@ -46,24 +46,25 @@ std::list<std::string>* modsToToggle = new std::list<std::string>();
 
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive) {
 	QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName](bool value){
-		if (value != modsEnabled->at(toggleName)) modsToToggle->emplace_front(toggleName);
-		else modsToToggle->remove(toggleName);
+		std::string fileName = ModUtils::GetFileName(toggleName);
+
+		if (value != modsEnabled->at(fileName)) modsToToggle->emplace_front(fileName);
+		else modsToToggle->remove(fileName);
 	});
 }
 
 void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods) {
 	for (std::pair<std::string, bool> mod : *mods) {
-		CreateModToggle(container, mod.first, mod.second);
+		CreateModToggle(container, ModUtils::GetModName(mod.first), mod.second);
 	}
 }
 
 void PopulateModsEnabledMap (std::unordered_map<std::string, bool>* map) {
-	for (std::string fileName : DirUtils::GetDirContents("/sdcard/Android/data/com.beatgames.beatsaber/files/mods/")) {
-		if (fileName.length() > 9 && !strcmp(fileName.substr(fileName.size() - 9).c_str(), ".disabled")) {
-			map->emplace(fileName.substr(0, fileName.size() - 9), false);
-		} else if (fileName.length() > 3 && !strcmp(fileName.substr(fileName.size() - 3).c_str(), ".so")) {
-			map->emplace(fileName.substr(0, fileName.size() - 3), true);
-		}
+	for (std::string fileName : ModUtils::GetDirContents("/sdcard/Android/data/com.beatgames.beatsaber/files/mods/")) {
+		if (!ModUtils::IsFileName(fileName)) continue;
+
+		if (ModUtils::IsDisabled(fileName)) map->emplace(fileName, false);
+		else map->emplace(fileName, true);
 	}
 }
 
