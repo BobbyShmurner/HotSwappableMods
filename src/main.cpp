@@ -143,7 +143,6 @@ MAKE_HOOK_MATCH(RestartTest, &GlobalNamespace::MainMenuViewController::DidActiva
 MAKE_HOOK_MATCH(OnBackButton, &UnityEngine::UI::Button::Press, void, UnityEngine::UI::Button* self) {
     OnBackButton(self);
 
-    getLogger().info("Button Pressed!");
     if (((UnityEngine::UI::Button*)BackButton) == self) {
         if (modsToToggle->size() == 0) return;
         ModUtils::SetModsActive(modsToToggle);

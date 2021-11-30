@@ -106,7 +106,7 @@ namespace ModUtils {
     // Name Conversions
 
     std::string GetModName(std::string name) {
-		if (IsModName(name)) { getLogger().info("\"%s\" Already Mod Name! Returning", name.c_str()); return name; }
+		if (IsModName(name)) return name;
 		std::string libName;
 		std::string modName;
 
@@ -114,30 +114,28 @@ namespace ModUtils {
 		else libName = name;
 
 		
-		if (IsOddLibName(libName)) { getLogger().info("Returning Odd Lib \"%s\" as Mod Name", libName.c_str()); return libName; }
-		else { getLogger().info("Returning \"%s\" as Mod Name", libName.substr(3).c_str()); return libName.substr(3); }
+		if (IsOddLibName(libName)) return libName;
+		else return libName.substr(3);
 	}
 
     std::string GetLibName(std::string name) {
-		if (IsLibName(name)) { getLogger().info("\"%s\" Already Lib Name! Returning", name.c_str()); return name; }
+		if (IsLibName(name)) return name;
 
 		if (IsFileName(name)) {
-			if (IsDisabled(name)) { getLogger().info("Returning \"%s\" as LibName", name.substr(0, name.size() - 9).c_str()); return name.substr(0, name.size() - 9); }
-			else { getLogger().info("Returning \"%s\" as LibName", name.substr(0, name.size() - 3).c_str()); return name.substr(0, name.size() - 3); }
+			if (IsDisabled(name)) return name.substr(0, name.size() - 9);
+			else return name.substr(0, name.size() - 3);
 		} else {
-			getLogger().info("Returning \"%s\" as LibName", ("lib" + name).c_str());
 			return "lib" + name;
 		}
 	}
 
     std::string GetFileName(std::string name) {
-		if (IsFileName(name)) { getLogger().info("\"%s\" Already File Name! Returning", name.c_str()); return name; }
+		if (IsFileName(name)) return name;
 		std::string libName;
 
 		if (IsLibName(name)) libName = name;
 		else libName = GetLibName(name);
 
-		getLogger().info("Returning \"%s\" as FileName", GetFileNameFromDir(libName).c_str());
 		return GetFileNameFromDir(libName);
 	}
 
