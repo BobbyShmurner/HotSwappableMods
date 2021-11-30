@@ -5,6 +5,8 @@ namespace ModUtils {
 	const char* modPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
 	std::list<std::string>* OddLibNames = new std::list<std::string>();
 
+	bool AlwaysDisplayLibNames = false;
+
 	std::list<std::string> GetDirContents(const char* dirPath) {
 		DIR* dir = opendir(dirPath);
 		dirent* dp;
@@ -79,9 +81,13 @@ namespace ModUtils {
 		return (std::find(OddLibNames->begin(), OddLibNames->end(), name) != OddLibNames->end());
 	}
 
+    // Mod Display Name = Mod Name
     // Mod Name = modname
     // Lib Name = libmodname
     // File Name = libmodname.so / libmodname.disabled
+
+    // Mod Names, Lib Names and File Names can all convert between eachother,
+    // But a Mod Display Name can only convert to a File Name
 
     // Name Tests
 
@@ -133,5 +139,24 @@ namespace ModUtils {
 
 		getLogger().info("Returning \"%s\" as FileName", GetFileNameFromDir(libName).c_str());
 		return GetFileNameFromDir(libName);
+	}
+
+	std::string GetModDisplayName(std::string name) {
+		if (AlwaysDisplayLibNames) return GetLibName(name);
+
+		std::string fileName = GetFileName(name);
+		std::unordered_map<std::string, const Mod> mods = Modloader::getMods();
+		
+		for (std::pair<std::string, const Mod> modPair : mods) {
+			if (!strcmp(name.c_str(), modPair.second.name.c_str())) return modPair.first;
+		}
+
+		return name;
+	}
+
+	std::string GetFileNameFromDisplayName(std::string displayName) {
+		if (AlwaysDisplayLibNames) return GetFileName(displayName);
+
+		return Modloader::getMods().at(displayName).name;
 	}
 }

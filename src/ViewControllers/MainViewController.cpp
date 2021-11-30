@@ -47,6 +47,7 @@ std::list<std::string>* modsToToggle = new std::list<std::string>();
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive) {
 	QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName](bool value){
 		std::string fileName = ModUtils::GetFileName(toggleName);
+		if (!ModUtils::IsLibName(toggleName)) fileName = ModUtils::GetFileNameFromDisplayName(toggleName);
 
 		if (value != modsEnabled->at(fileName)) modsToToggle->emplace_front(fileName);
 		else modsToToggle->remove(fileName);
@@ -55,7 +56,10 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 
 void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods) {
 	for (std::pair<std::string, bool> mod : *mods) {
-		CreateModToggle(container, ModUtils::GetModName(mod.first), mod.second);
+		std::string toggleName = ModUtils::GetModDisplayName(mod.first);
+		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName);
+
+		CreateModToggle(container, toggleName, mod.second);
 	}
 }
 
@@ -77,6 +81,8 @@ void HotSwappableMods::MainViewController::DidActivate(bool firstActivation, boo
 	PopulateModsEnabledMap(modsEnabled);
 
 	if (!firstActivation) return;
+
+	ModUtils::GetModDisplayName({"chorma.so"});
 
 	UnityEngine::GameObject* mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
 

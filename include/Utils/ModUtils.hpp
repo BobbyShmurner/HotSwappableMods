@@ -20,9 +20,13 @@ namespace ModUtils {
     bool IsDisabled(std::string name);
     bool IsOddLibName(std::string name);
 
+    // Mod Display Name = Mod Name
     // Mod Name = modname
     // Lib Name = libmodname
     // File Name = libmodname.so / libmodname.disabled
+
+    // Mod Names, Lib Names and File Names can all convert between eachother,
+    // But a Mod Display Name can only convert to a File Name
 
     // Name Tests
 
@@ -35,4 +39,7 @@ namespace ModUtils {
     std::string GetModName(std::string name);
     std::string GetLibName(std::string name);
     std::string GetFileName(std::string name);
+
+    std::string GetModDisplayName(std::string name);
+    std::string GetFileNameFromDisplayName(std::string name);
 }
