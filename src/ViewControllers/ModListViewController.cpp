@@ -109,8 +109,10 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 
 void ClearModToggles() {
 	for (std::pair<std::string, UnityEngine::UI::Toggle*> togglePair : *modToggles) {
-		GameObject::Destroy(togglePair.second->get_transform()->get_parent()->get_gameObject());
+		GameObject* tmpToggle = togglePair.second->get_transform()->get_parent()->get_gameObject();
+		if (tmpToggle != nullptr) GameObject::Destroy(tmpToggle);
 	}
+
 	modToggles->clear();
 }
 
@@ -143,12 +145,15 @@ void PopulateModsEnabledMap (std::unordered_map<std::string, bool>* map) {
 }
 
 void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
+	getLogger().info("ModListViewController::DidActivate()");
+
 	if (firstActivation) mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
 	else {
 		ClearModToggles();
-		if (modText != nullptr) 	GameObject::Destroy(modText->get_gameObject());
-		if (coreModText != nullptr)	GameObject::Destroy(coreModText->get_gameObject());
-		if (coreModDesc != nullptr)	GameObject::Destroy(coreModDesc->get_gameObject());
+
+		if (modText != nullptr) 	{ GameObject::Destroy(modText->get_gameObject()); modText = nullptr; }
+		if (coreModText != nullptr)	{ GameObject::Destroy(coreModText->get_gameObject()); coreModText = nullptr; }
+		if (coreModDesc != nullptr)	{ GameObject::Destroy(coreModDesc->get_gameObject()); coreModDesc = nullptr; }
 	}
 
 	ModUtils::GetOddLibNames();
@@ -176,4 +181,5 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	coreModDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
 	PopulateModToggles(mainContainer->get_transform(), modsEnabled, true);
+
 }

@@ -66,4 +66,8 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 	QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Core Mods", getMainConfig().ShowCoreMods.GetValue(), [](bool value){
 		getMainConfig().ShowCoreMods.SetValue(value);
 	});
+
+	QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Libs", getMainConfig().ShowLibs.GetValue(), [](bool value){
+		getMainConfig().ShowLibs.SetValue(value);
+	});
 }
