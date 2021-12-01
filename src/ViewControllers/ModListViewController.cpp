@@ -2,6 +2,7 @@
 
 #include "Utils/BobbyUtils.hpp"
 #include "Utils/ModUtils.hpp"
+#include "Utils/HiddenModConfigUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -59,8 +60,14 @@ std::list<std::string>* modsToToggle = new std::list<std::string>();
 
 UnityEngine::GameObject* mainContainer;
 
-void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive) {
-	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName](bool value){
+TMPro::TextMeshProUGUI* modText;
+TMPro::TextMeshProUGUI* coreModText;
+TMPro::TextMeshProUGUI* coreModDesc;
+
+void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isHiddenMod) {
+
+
+	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, isHiddenMod](bool value){
 		std::string fileName = ModUtils::GetFileName(toggleName);
 		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
 
@@ -68,28 +75,59 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 
 		if (value != modsEnabled->at(fileName)) {
 			modsToToggle->emplace_front(fileName);
-			textMesh->set_color({1.0f, 1.0f, 0.5f, 1.0f});
+
+			// Text Colours
+			if (isHiddenMod) {
+				if (modsEnabled->at(fileName)) { // Is currently on, but will be disabled after restart
+					textMesh->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+				} else { // Is currently off, but will be enabled after restart
+					textMesh->set_color({0.0f, 1.0f, 0.0f, 1.0f});
+				}
+			}
+			else textMesh->set_color({1.0f, 1.0f, 0.5f, 1.0f});
 		}
 		else { 
 			modsToToggle->remove(fileName);
-			textMesh->set_color({1.0f, 1.0f, 1.0f, 1.0f});
+			if (isHiddenMod) {
+				if (!value) { // Is currently off, should be turned on tho
+					textMesh->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+				} else { // Is currently on, lets leave it that way xD
+					textMesh->set_color({1.0f, 1.0f, 1.0f, 1.0f});
+				}
+			}
+			else textMesh->set_color({1.0f, 1.0f, 1.0f, 1.0f});
 		}
 	});
 
 	modToggles->emplace(toggleName, newToggle);
+	
+	if (isHiddenMod && !isActive) { // Is currently off, should be turned on tho
+		TMPro::TextMeshProUGUI* newToggleTextMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
+		newToggleTextMesh->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+	}
 }
 
-void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods) {
+void ClearModToggles() {
 	for (std::pair<std::string, UnityEngine::UI::Toggle*> togglePair : *modToggles) {
 		GameObject::Destroy(togglePair.second->get_transform()->get_parent()->get_gameObject());
 	}
 	modToggles->clear();
+}
+
+void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool isHiddenMods) {
+	std::list<std::string> modsToHide = HiddenModConfigUtils::GetHiddenModsList();
 
 	for (std::pair<std::string, bool> mod : *mods) {
 		std::string toggleName = ModUtils::GetModDisplayName(mod.first);
 		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName);
 
-		CreateModToggle(container, toggleName, mod.second);
+		if (std::find(modsToHide.begin(), modsToHide.end(), ModUtils::GetLibName(mod.first)) != modsToHide.end()){
+			if (!isHiddenMods) continue;
+		} else {
+			if (isHiddenMods) continue;
+		}
+		
+		CreateModToggle(container, toggleName, mod.second, isHiddenMods);
 	}
 }
 
@@ -105,20 +143,37 @@ void PopulateModsEnabledMap (std::unordered_map<std::string, bool>* map) {
 }
 
 void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
-	BackButton = GameObject::Find(il2cpp_utils::newcsstr("BackButton"))->GetComponent<HMUI::NoTransitionsButton*>();
-
 	if (firstActivation) mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
-	else PopulateModToggles(mainContainer->get_transform(), modsEnabled);
+	else {
+		ClearModToggles();
+		if (modText != nullptr) 	GameObject::Destroy(modText->get_gameObject());
+		if (coreModText != nullptr)	GameObject::Destroy(coreModText->get_gameObject());
+		if (coreModDesc != nullptr)	GameObject::Destroy(coreModDesc->get_gameObject());
+	}
 
 	ModUtils::GetOddLibNames();
+	ModUtils::UpdateAlwaysDisplayLibNames(getMainConfig().AlwaysShowFileNames.GetValue());
+
 	PopulateModsEnabledMap(modsEnabled);
 
-	if (!firstActivation) return;
+	BackButton = GameObject::Find(il2cpp_utils::newcsstr("BackButton"))->GetComponent<HMUI::NoTransitionsButton*>();
 
-	TMPro::TextMeshProUGUI* titleText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Mod List", false);
-	titleText->set_fontSize(10.0f);
-	titleText->set_alignment(TMPro::TextAlignmentOptions::Center);
+	modText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Mod List", false);
+	modText->set_fontSize(10.0f);
+	modText->set_alignment(TMPro::TextAlignmentOptions::Center);
 
-	ModUtils::UpdateAlwaysDisplayLibNames(getMainConfig().AlwaysShowFileNames.GetValue());
-	PopulateModToggles(mainContainer->get_transform(), modsEnabled);
+	PopulateModToggles(mainContainer->get_transform(), modsEnabled, false);
+
+	if (!getMainConfig().ShowCoreMods.GetValue()) return;
+
+	coreModText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Core Mods", false);
+	coreModText->set_fontSize(10.0f);
+	coreModText->set_alignment(TMPro::TextAlignmentOptions::Top); // This actually positions it at the bottom. Dont ask me why
+	coreModText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+
+	coreModDesc = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Be very careful when messing with these!", false);
+	coreModDesc->set_alignment(TMPro::TextAlignmentOptions::Center);
+	coreModDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+
+	PopulateModToggles(mainContainer->get_transform(), modsEnabled, true);
 }

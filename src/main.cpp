@@ -1,8 +1,10 @@
 #include "main.hpp"
+
 #include "Utils/JNIUtils.hpp"
 #include "Utils/ModUtils.hpp"
-#include "DataTypes/PublicMod.hpp"
+#include "Utils/HiddenModConfigUtils.hpp"
 
+#include "DataTypes/PublicMod.hpp"
 #include "DataTypes/MainConfig.hpp"
 
 #include "ViewControllers/ModListViewController.hpp"
@@ -31,7 +33,7 @@
 #include "GlobalNamespace/NoteController.hpp"
 #include "GlobalNamespace/SharedCoroutineStarter.hpp"
 
-static ModInfo modInfo; // Stores the ID and version of our mod, and is sent to the modloader upon startup
+ModInfo modInfo; // Stores the ID and version of our mod, and is sent to the modloader upon startup
 
 static JavaVM* jvm;
 
@@ -169,6 +171,8 @@ extern "C" void load() {
     il2cpp_functions::Init();
     getMainConfig().Init(modInfo);
 
+    HiddenModConfigUtils::SetModsToHide();
+
     getLogger().info("Installing hooks...");
     INSTALL_HOOK(getLogger(), OnBackButton);
     getLogger().info("Installed all hooks!");
@@ -178,4 +182,6 @@ extern "C" void load() {
     QuestUI::Register::RegisterModSettingsViewController<HotSwappableMods::SettingsViewController*>(modInfo);
     QuestUI::Register::RegisterMainMenuModSettingsViewController<HotSwappableMods::ModListViewController*>(modInfo);
     getLogger().info("Setup QuestUI!");
+
+    getLogger().info("Config Loc: %s", getConfig().getConfigFilePath(modInfo).c_str());
 }
