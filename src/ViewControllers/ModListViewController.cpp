@@ -65,8 +65,6 @@ TMPro::TextMeshProUGUI* coreModText;
 TMPro::TextMeshProUGUI* coreModDesc;
 
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isHiddenMod) {
-
-
 	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, isHiddenMod](bool value){
 		std::string fileName = ModUtils::GetFileName(toggleName);
 		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
@@ -147,7 +145,12 @@ void PopulateModsEnabledMap (std::unordered_map<std::string, bool>* map) {
 void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
 	getLogger().info("ModListViewController::DidActivate()");
 
-	if (firstActivation) mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
+	if (firstActivation) {
+		mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
+		
+		UnityEngine::Transform* scrollViewParentTrans = mainContainer->get_transform()->get_parent()->get_parent()->get_parent();
+		scrollViewParentTrans->GetComponent<UnityEngine::RectTransform*>()->set_anchorMin({0, 0.1f});
+	}
 	else {
 		ClearModToggles();
 
@@ -181,4 +184,22 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	coreModDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
 	PopulateModToggles(mainContainer->get_transform(), modsEnabled, true);
+
+	if (!firstActivation) return;
+
+	UnityEngine::UI::Button* restartButton = QuestUI::BeatSaberUI::CreateUIButton(get_transform(), "Restart", {"ApplyButton"}, [](){
+		ModUtils::SetModsActive(modsToToggle);
+        ModUtils::RestartBS();
+	});
+
+	restartButton->get_transform()->set_position({0, 0.2f, 4.35f});
+
+	getLogger().info("Restart Button Pos: %s", BobbyUtils::ToString(restartButton->get_transform()->get_position()).c_str());
+	getLogger().info("Restart Button Local Pos: %s", BobbyUtils::ToString(restartButton->get_transform()->get_localPosition()).c_str());
+	getLogger().info("Restart Button Offset Min: %s", BobbyUtils::ToString(restartButton->GetComponent<UnityEngine::RectTransform*>()->get_anchorMin()).c_str());
+	getLogger().info("Restart Button Offset Max: %s", BobbyUtils::ToString(restartButton->GetComponent<UnityEngine::RectTransform*>()->get_anchorMax()).c_str());
+}
+
+void ClearModsToToggle() {
+	modsToToggle->clear();
 }

@@ -74,8 +74,7 @@ MAKE_HOOK_MATCH(OnBackButton, &UnityEngine::UI::Button::Press, void, UnityEngine
 
     if (((UnityEngine::UI::Button*)BackButton) == self) {
         if (modsToToggle->size() == 0) return;
-        ModUtils::SetModsActive(modsToToggle);
-        ModUtils::RestartBS();
+        ClearModsToToggle(); // This clears the mods to enable/disable list in the ModListViewController
     }
 }
 

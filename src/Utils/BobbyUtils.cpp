@@ -8,6 +8,9 @@
 #include "UnityEngine/MonoBehaviour.hpp"
 #include "UnityEngine/Transform.hpp"
 
+#include "UnityEngine/Vector2.hpp"
+#include "UnityEngine/Vector3.hpp"
+
 namespace BobbyUtils {
 	bool IsNumber(const std::string& str)
 	{
@@ -33,6 +36,9 @@ namespace BobbyUtils {
 
 		return "Null";
 	}
+
+	template std::string ToString<UnityEngine::Vector2>(UnityEngine::Vector2 obj);
+	template std::string ToString<UnityEngine::Vector3>(UnityEngine::Vector3 obj);
 
 	void LogHierarchy(UnityEngine::Transform* trans, int level = 0) {
 		if (level == 0) getLogger().info("Logging Hierarchy for %s:", BobbyUtils::Il2cppStrToStr(trans->get_name()).c_str());
