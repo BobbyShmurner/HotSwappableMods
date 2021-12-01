@@ -181,5 +181,4 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	coreModDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
 	PopulateModToggles(mainContainer->get_transform(), modsEnabled, true);
-
 }

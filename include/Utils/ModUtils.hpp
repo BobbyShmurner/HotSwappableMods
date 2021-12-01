@@ -44,4 +44,10 @@ namespace ModUtils {
 
     std::string GetModDisplayName(std::string name);
     std::string GetFileNameFromDisplayName(std::string name);
+
+    // Restarting Shit
+
+    void RestartBS();
+    void CacheJVM();
+	void __attribute__((constructor)) DlOpened();
 }
