@@ -72,17 +72,6 @@ extern "C" void setup(ModInfo& info) {
     getLogger().info("Completed setup!");
 }
 
-void LogHooks() {
-    static const std::unordered_map<const void*, std::list<HookInfo>>* hooks = HookTracker::GetHooks();
-    int i = 0;
-    for (std::pair<const void*, std::list<HookInfo>> hookPair : *hooks) {
-        for (HookInfo hook : hookPair.second) {
-            getLogger().info("%i: %s -> %p", i, hook.name.c_str(), hook.destination);
-        }
-        i++;
-    }
-}
-
 void CacheJVM() {
     JNIEnv* env = Modloader::getJni();
     env->GetJavaVM(&jvm);
@@ -182,6 +171,4 @@ extern "C" void load() {
     QuestUI::Register::RegisterModSettingsViewController<HotSwappableMods::SettingsViewController*>(modInfo);
     QuestUI::Register::RegisterMainMenuModSettingsViewController<HotSwappableMods::ModListViewController*>(modInfo);
     getLogger().info("Setup QuestUI!");
-
-    getLogger().info("Config Loc: %s", getConfig().getConfigFilePath(modInfo).c_str());
 }

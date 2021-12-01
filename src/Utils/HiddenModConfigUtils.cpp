@@ -53,7 +53,6 @@ namespace HiddenModConfigUtils {
 				ModsToHide.clear();
 				for (rapidjson::SizeType i = 0; i < configModsToHide.Size(); i++) { // rapidjson uses SizeType instead of size_t.
 					ModsToHide.emplace_front(std::string(configModsToHide[i].GetString()));
-					getLogger().info("a[%d] = %s", i, configModsToHide[i].GetString());
 				}
 
 				return;
@@ -61,7 +60,6 @@ namespace HiddenModConfigUtils {
 		}
 
 		// Create the Array
-		getLogger().info("Creating the Hidden Mods Config Array");
 		if (configDoc.HasMember("ModsToHide")) configDoc.RemoveMember("ModsToHide");
 
 		rapidjson::Value ary (rapidjson::kArrayType);

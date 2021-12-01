@@ -2,6 +2,8 @@
 #include "DataTypes/MainConfig.hpp"
 #include "main.hpp"
 
+#define _DEFAULT_SOURCE
+
 namespace ModUtils {
 	const char* ModPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
 	std::list<std::string>* OddLibNames = new std::list<std::string>();
@@ -16,7 +18,7 @@ namespace ModUtils {
 		if (dir == nullptr) return files;
 
 		while ((dp = readdir(dir)) != NULL) {
-			if (strlen(dp->d_name) > 3) {
+			if (strlen(dp->d_name) > 3 && dp->d_type != DT_DIR) {
 				files.emplace_front(std::string(dp->d_name));
 			}
 		}
