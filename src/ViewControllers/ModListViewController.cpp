@@ -67,6 +67,8 @@ TMPro::TextMeshProUGUI* coreModDesc;
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isHiddenMod) {
 	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, isHiddenMod](bool value){
 		std::string fileName = ModUtils::GetFileName(toggleName);
+		BobbyUtils::LogHierarchy(modToggles->at(toggleName)->get_transform()->get_parent());
+		getLogger().info("Reached This Point! filename: %s", fileName.c_str());	
 		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
 
 		if (!ModUtils::IsLibName(toggleName)) fileName = ModUtils::GetFileNameFromDisplayName(toggleName);
@@ -131,40 +133,48 @@ void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<st
 	}
 }
 
-void PopulateModsEnabledMap (std::unordered_map<std::string, bool>* map) {
-	map->clear();
+void PopulateModsEnabledMap() {
+	modsEnabled->clear();
 
 	for (std::string fileName : ModUtils::GetDirContents("/sdcard/Android/data/com.beatgames.beatsaber/files/mods/")) {
 		if (!ModUtils::IsFileName(fileName)) continue;
 
-		if (ModUtils::IsDisabled(fileName)) map->emplace(fileName, false);
-		else map->emplace(fileName, true);
+		if (ModUtils::IsDisabled(fileName)) modsEnabled->emplace(fileName, false);
+		else modsEnabled->emplace(fileName, true);
 	}
 }
 
 void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
-	getLogger().info("ModListViewController::DidActivate()");
-
 	if (firstActivation) {
 		mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
 		
 		UnityEngine::Transform* scrollViewParentTrans = mainContainer->get_transform()->get_parent()->get_parent()->get_parent();
 		scrollViewParentTrans->GetComponent<UnityEngine::RectTransform*>()->set_anchorMin({0, 0.1f});
-	}
-	else {
-		ClearModToggles();
 
+		// Dont wanna use the clear functions, as it will lead to nullptr derefrences. So we just manually clear them
+		modToggles->clear();
+		modsEnabled->clear();
+
+		// Same idea with the text
+		modText = nullptr;
+		coreModText = nullptr;
+		coreModDesc = nullptr;
+	} else {
 		if (modText != nullptr) 	{ GameObject::Destroy(modText->get_gameObject()); modText = nullptr; }
 		if (coreModText != nullptr)	{ GameObject::Destroy(coreModText->get_gameObject()); coreModText = nullptr; }
 		if (coreModDesc != nullptr)	{ GameObject::Destroy(coreModDesc->get_gameObject()); coreModDesc = nullptr; }
+
+		ClearModToggles();
 	}
 
 	ModUtils::GetOddLibNames();
 	ModUtils::UpdateAlwaysDisplayLibNames(getMainConfig().AlwaysShowFileNames.GetValue());
 
-	PopulateModsEnabledMap(modsEnabled);
+	PopulateModsEnabledMap();
 
 	BackButton = GameObject::Find(il2cpp_utils::newcsstr("BackButton"))->GetComponent<HMUI::NoTransitionsButton*>();
+
+	// Mod List
 
 	modText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Mod List", false);
 	modText->set_fontSize(10.0f);
@@ -172,20 +182,26 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 	PopulateModToggles(mainContainer->get_transform(), modsEnabled, false);
 
-	if (!getMainConfig().ShowCoreMods.GetValue()) return;
+	// Core Mods
 
-	coreModText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Core Mods", false);
-	coreModText->set_fontSize(10.0f);
-	coreModText->set_alignment(TMPro::TextAlignmentOptions::Top); // This actually positions it at the bottom. Dont ask me why
-	coreModText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+	if (getMainConfig().ShowCoreMods.GetValue()) {
+		coreModText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Core Mods", false);
+		coreModText->set_fontSize(10.0f);
+		coreModText->set_alignment(TMPro::TextAlignmentOptions::Top); // This actually positions it at the bottom. Dont ask me why
+		coreModText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
-	coreModDesc = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Be very careful when messing with these!", false);
-	coreModDesc->set_alignment(TMPro::TextAlignmentOptions::Center);
-	coreModDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+		coreModDesc = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Be very careful when messing with these!", false);
+		coreModDesc->set_alignment(TMPro::TextAlignmentOptions::Center);
+		coreModDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
-	PopulateModToggles(mainContainer->get_transform(), modsEnabled, true);
+		PopulateModToggles(mainContainer->get_transform(), modsEnabled, true);
+	}
+
+	getLogger().info("Loaded UI!");
 
 	if (!firstActivation) return;
+
+	// Restart Button
 
 	UnityEngine::UI::Button* restartButton = QuestUI::BeatSaberUI::CreateUIButton(get_transform(), "Restart", {"ApplyButton"}, [](){
 		ModUtils::SetModsActive(modsToToggle);
@@ -193,11 +209,6 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	});
 
 	restartButton->get_transform()->set_position({0, 0.2f, 4.35f});
-
-	getLogger().info("Restart Button Pos: %s", BobbyUtils::ToString(restartButton->get_transform()->get_position()).c_str());
-	getLogger().info("Restart Button Local Pos: %s", BobbyUtils::ToString(restartButton->get_transform()->get_localPosition()).c_str());
-	getLogger().info("Restart Button Offset Min: %s", BobbyUtils::ToString(restartButton->GetComponent<UnityEngine::RectTransform*>()->get_anchorMin()).c_str());
-	getLogger().info("Restart Button Offset Max: %s", BobbyUtils::ToString(restartButton->GetComponent<UnityEngine::RectTransform*>()->get_anchorMax()).c_str());
 }
 
 void ClearModsToToggle() {

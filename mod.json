@@ -3,13 +3,16 @@
   "name": "Hot-Swappable Mods",
   "id": "HotSwappableMods",
   "author": "Bobby Shmurner",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packageId": "com.beatgames.beatsaber",
   "packageVersion": "1.17.1",
   "description": "Allows you to enable and disable your mods from in game!",
   "coverImage": "cover.png",
   "dependencies": [],
-  "modFiles": [],
-  "libraryFiles": [],
-  "fileCopies": []
+  "modFiles": [
+    "libHotSwappableMods.so"
+  ],
+  "libraryFiles": [
+    "libbeatsaber-hook_2_3_2.so"
+  ]
 }
