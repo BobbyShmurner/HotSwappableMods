@@ -51,8 +51,6 @@ extern ModInfo modInfo;
 
 DEFINE_TYPE(HotSwappableMods, ModListViewController);
 
-HMUI::NoTransitionsButton* BackButton;
-
 std::unordered_map<std::string, bool>* modsEnabled = new std::unordered_map<std::string, bool>();
 std::unordered_map<std::string, UnityEngine::UI::Toggle*>* modToggles = new std::unordered_map<std::string, UnityEngine::UI::Toggle*>();
 
@@ -63,6 +61,9 @@ UnityEngine::GameObject* mainContainer;
 TMPro::TextMeshProUGUI* modText;
 TMPro::TextMeshProUGUI* coreModText;
 TMPro::TextMeshProUGUI* coreModDesc;
+
+HMUI::NoTransitionsButton* BackButton;
+UnityEngine::UI::Button* restartButton;
 
 UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool isHiddenMod, bool isModLoaded) {
 	if (isCurrentlyEnabled != toggleValue) {
@@ -93,14 +94,12 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 
 	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, isHiddenMod, fileName](bool value){
 		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-		textMesh->set_color({1.0f, 1.0f, 0.0f, 1.0f});
-
-		getLogger().info("Reached This Point!");	
-
 		textMesh->set_color(GetTextColor(modsEnabled->at(fileName), value, isHiddenMod, ModUtils::IsModLoaded(fileName)));
 
 		if (value != modsEnabled->at(fileName)) modsToToggle->emplace_front(fileName);
 		else modsToToggle->remove(fileName);
+
+		restartButton->set_interactable(modsToToggle->size() != 0);
 	});
 
 	modToggles->emplace(toggleName, newToggle);
@@ -205,12 +204,13 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 	// Restart Button
 
-	UnityEngine::UI::Button* restartButton = QuestUI::BeatSaberUI::CreateUIButton(get_transform(), "Restart", {"ApplyButton"}, [](){
+	restartButton = QuestUI::BeatSaberUI::CreateUIButton(get_transform(), "Reload Mods", {"ApplyButton"}, [](){
 		ModUtils::SetModsActive(modsToToggle);
         ModUtils::RestartBS();
 	});
 
 	restartButton->get_transform()->set_position({0, 0.2f, 4.35f});
+	restartButton->set_interactable(false);
 }
 
 void ClearModsToToggle() {
