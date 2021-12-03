@@ -10,25 +10,23 @@
 
 namespace ModUtils {
 	std::list<std::string> GetDirContents(const char* dirPath);
-    std::string GetFileNameFromDir(std::string libName);
-    
-    void ToggleMod(std::string modName);
-    void SetModsActive(std::list<std::string>* mods);
+	std::string GetFileNameFromDir(std::string libName);
 
+	void ToggleMod(std::string modName);
+	void SetModsActive(std::list<std::string>* mods);
     void GetOddLibNames();
 
-    bool IsDisabled(std::string name);
-    bool IsOddLibName(std::string name);
+	bool IsDisabled(std::string name);
+	bool IsOddLibName(std::string name);
+	bool IsModLoaded(std::string name);
 
-    void UpdateAlwaysDisplayLibNames(bool value);
+	void UpdateAlwaysDisplayLibNames(bool value);
 
-    // Mod Display Name = Mod Name
-    // Mod Name = modname
+    // Mod Name = Mod Name
     // Lib Name = libmodname
     // File Name = libmodname.so / libmodname.disabled
 
-    // Mod Names, Lib Names and File Names can all convert between eachother,
-    // But a Mod Display Name can only convert to a File Name
+    // Mod Names, Lib Names and File Names can all convert between eachother
 
     // Name Tests
 
@@ -38,16 +36,16 @@ namespace ModUtils {
 
     // Name Conversions
 
-    std::string GetModName(std::string name);
+	std::string GetModName(std::string name);
     std::string GetLibName(std::string name);
     std::string GetFileName(std::string name);
 
-    std::string GetModDisplayName(std::string name);
-    std::string GetFileNameFromDisplayName(std::string name);
+	std::string GetFileNameFromDisplayName(std::string displayName);
+	std::list<std::string> GetLoadedModsNames();
+	std::list<std::string> GetLoadedModsFileNames();
 
-    // Restarting Shit
+	void RestartBS();
 
-    void RestartBS();
-    void CacheJVM();
+	void CacheJVM();
 	void __attribute__((constructor)) DlOpened();
 }

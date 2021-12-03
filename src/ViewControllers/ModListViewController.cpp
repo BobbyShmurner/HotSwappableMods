@@ -64,47 +64,49 @@ TMPro::TextMeshProUGUI* modText;
 TMPro::TextMeshProUGUI* coreModText;
 TMPro::TextMeshProUGUI* coreModDesc;
 
-void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isHiddenMod) {
-	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, isHiddenMod](bool value){
-		std::string fileName = ModUtils::GetFileName(toggleName);
-		BobbyUtils::LogHierarchy(modToggles->at(toggleName)->get_transform()->get_parent());
-		getLogger().info("Reached This Point! filename: %s", fileName.c_str());	
-		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-
-		if (!ModUtils::IsLibName(toggleName)) fileName = ModUtils::GetFileNameFromDisplayName(toggleName);
-
-		if (value != modsEnabled->at(fileName)) {
-			modsToToggle->emplace_front(fileName);
-
-			// Text Colours
+UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool isHiddenMod, bool isModLoaded) {
+	if (isCurrentlyEnabled != toggleValue) {
 			if (isHiddenMod) {
-				if (modsEnabled->at(fileName)) { // Is currently on, but will be disabled after restart
-					textMesh->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+				if (!toggleValue) { // Is currently on, but will be disabled after restart
+					return {1.0f, 0.0f, 0.0f, 1.0f};
 				} else { // Is currently off, but will be enabled after restart
-					textMesh->set_color({0.0f, 1.0f, 0.0f, 1.0f});
+					return {0.0f, 1.0f, 0.0f, 1.0f};
 				}
 			}
-			else textMesh->set_color({1.0f, 1.0f, 0.5f, 1.0f});
+			return {1.0f, 1.0f, 0.0f, 1.0f}; // Mod Will Change after restart
 		}
-		else { 
-			modsToToggle->remove(fileName);
-			if (isHiddenMod) {
-				if (!value) { // Is currently off, should be turned on tho
-					textMesh->set_color({1.0f, 0.0f, 0.0f, 1.0f});
-				} else { // Is currently on, lets leave it that way xD
-					textMesh->set_color({1.0f, 1.0f, 1.0f, 1.0f});
-				}
+		else {
+			if (!toggleValue) { 
+				if (isHiddenMod) return {1.0f, 0.0f, 0.0f, 1.0f}; // Is currently off, SHOULD be turned on tho
+				else return {1.0f, 1.0f, 1.0f, 1.0f};
+			} else { // Is currently on, lets leave it that way xD
+				if (isModLoaded) return {1.0f, 1.0f, 1.0f, 1.0f};
+				else return {1.0f, 0.5f, 0.0f, 1.0f};
 			}
-			else textMesh->set_color({1.0f, 1.0f, 1.0f, 1.0f});
 		}
+
+	return {1.0f, 1.0f, 1.0f, 1.0f};
+}
+
+void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isHiddenMod) {
+	std::string fileName = ModUtils::GetFileName(toggleName);
+
+	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, isHiddenMod, fileName](bool value){
+		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
+		textMesh->set_color({1.0f, 1.0f, 0.0f, 1.0f});
+
+		getLogger().info("Reached This Point!");	
+
+		textMesh->set_color(GetTextColor(modsEnabled->at(fileName), value, isHiddenMod, ModUtils::IsModLoaded(fileName)));
+
+		if (value != modsEnabled->at(fileName)) modsToToggle->emplace_front(fileName);
+		else modsToToggle->remove(fileName);
 	});
 
 	modToggles->emplace(toggleName, newToggle);
-	
-	if (isHiddenMod && !isActive) { // Is currently off, should be turned on tho
-		TMPro::TextMeshProUGUI* newToggleTextMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-		newToggleTextMesh->set_color({1.0f, 0.0f, 0.0f, 1.0f});
-	}
+
+	TMPro::TextMeshProUGUI* textMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
+	textMesh->set_color(GetTextColor(modsEnabled->at(fileName), modsEnabled->at(fileName), isHiddenMod, ModUtils::IsModLoaded(fileName)));
 }
 
 void ClearModToggles() {
@@ -120,7 +122,7 @@ void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<st
 	std::list<std::string> modsToHide = HiddenModConfigUtils::GetHiddenModsList();
 
 	for (std::pair<std::string, bool> mod : *mods) {
-		std::string toggleName = ModUtils::GetModDisplayName(mod.first);
+		std::string toggleName = ModUtils::GetModName(mod.first);
 		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName);
 
 		if (std::find(modsToHide.begin(), modsToHide.end(), ModUtils::GetLibName(mod.first)) != modsToHide.end()){

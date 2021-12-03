@@ -33,6 +33,7 @@ namespace ModUtils {
 		std::list<std::string> modFileNames = GetDirContents(ModPath);
 
 		for (std::string modFileName : modFileNames) {
+			getLogger().info("ModFileName: %s, ModLibName: %s, libName: %s", modFileName.c_str(), GetLibName(modFileName).c_str(), libName.c_str());
 			if (!strcmp(GetLibName(modFileName).c_str(), libName.c_str())) return modFileName;
 		}
 
@@ -87,18 +88,22 @@ namespace ModUtils {
 		return (std::find(OddLibNames->begin(), OddLibNames->end(), name) != OddLibNames->end());
 	}
 
+	bool IsModLoaded(std::string name) {
+		std::list<std::string> loadedModsLibNames = GetLoadedModsFileNames();
+
+		return (std::find(loadedModsLibNames.begin(), loadedModsLibNames.end(), GetFileName(name)) != loadedModsLibNames.end());
+	}
+
 	void UpdateAlwaysDisplayLibNames(bool value) {
 		AlwaysDisplayLibNames = value;
 		getMainConfig().AlwaysShowFileNames.SetValue(value);
 	}
 
-    // Mod Display Name = Mod Name
-    // Mod Name = modname
+    // Mod Name = Mod Name
     // Lib Name = libmodname
     // File Name = libmodname.so / libmodname.disabled
 
-    // Mod Names, Lib Names and File Names can all convert between eachother,
-    // But a Mod Display Name can only convert to a File Name
+    // Mod Names, Lib Names and File Names can all convert between eachother
 
     // Name Tests
 
@@ -116,28 +121,31 @@ namespace ModUtils {
 
     // Name Conversions
 
-    std::string GetModName(std::string name) {
-		if (IsModName(name)) return name;
-		std::string libName;
-		std::string modName;
+	std::string GetModName(std::string name) {
+		if (AlwaysDisplayLibNames) return GetLibName(name);
 
-		if (IsFileName(name)) libName = GetLibName(name);
-		else libName = name;
-
+		std::string fileName = GetFileName(name);
+		std::unordered_map<std::string, const Mod> mods = Modloader::getMods();
 		
-		if (IsOddLibName(libName)) return libName;
-		else return libName.substr(3);
+		for (std::pair<std::string, const Mod> modPair : mods) {
+			if (!strcmp(fileName.c_str(), modPair.second.name.c_str())) return modPair.first;
+		}
+
+		return GetLibName(name);
 	}
 
     std::string GetLibName(std::string name) {
 		if (IsLibName(name)) return name;
 
-		if (IsFileName(name)) {
-			if (IsDisabled(name)) return name.substr(0, name.size() - 9);
-			else return name.substr(0, name.size() - 3);
-		} else {
-			return "lib" + name;
-		}
+		std::string fileName;
+
+		if (IsFileName(name)) fileName = name;
+		else fileName = GetFileNameFromDisplayName(name);
+
+		if (IsDisabled(fileName)) return fileName.substr(0, fileName.size() - 9);
+		else return fileName.substr(0, fileName.size() - 3);
+
+		return fileName;
 	}
 
     std::string GetFileName(std::string name) {
@@ -150,23 +158,20 @@ namespace ModUtils {
 		return GetFileNameFromDir(libName);
 	}
 
-	std::string GetModDisplayName(std::string name) {
-		if (AlwaysDisplayLibNames) return GetLibName(name);
-
-		std::string fileName = GetFileName(name);
-		std::unordered_map<std::string, const Mod> mods = Modloader::getMods();
-		
-		for (std::pair<std::string, const Mod> modPair : mods) {
-			if (!strcmp(name.c_str(), modPair.second.name.c_str())) return modPair.first;
-		}
-
-		return name;
-	}
-
 	std::string GetFileNameFromDisplayName(std::string displayName) {
 		if (AlwaysDisplayLibNames) return GetFileName(displayName);
 
 		return Modloader::getMods().at(displayName).name;
+	}
+
+	std::list<std::string> GetLoadedModsFileNames() {
+		std::list<std::string> loadedMods;
+		for (std::pair<std::string, const Mod> modPair : Modloader::getMods()) {
+			loadedMods.emplace_front(modPair.second.name);
+			getLogger().info("Got File Name %s", modPair.second.name.c_str());
+		}
+
+		return loadedMods;
 	}
 
 	void RestartBS() {
@@ -219,6 +224,7 @@ namespace ModUtils {
 		GET_JCLASS(env, processClass, "android/os/Process", jclass);
 
 		CALL_STATIC_JINT_METHOD(env, pid, processClass, "myPid", "()I", jint);
+		getLogger().info("-- RESTARTING --");
 		CALL_STATIC_VOID_METHOD(env, processClass, killProcess, "(I)V", pid);
 	}
 
