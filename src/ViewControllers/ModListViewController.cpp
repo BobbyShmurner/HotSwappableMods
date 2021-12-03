@@ -120,8 +120,11 @@ void ClearModToggles() {
 
 void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool isHiddenMods) {
 	std::list<std::string> modsToHide = HiddenModConfigUtils::GetHiddenModsList();
+	std::list<std::string> noNoMods = HiddenModConfigUtils::GetNoNoModsList();
 
 	for (std::pair<std::string, bool> mod : *mods) {
+		if (std::find(noNoMods.begin(), noNoMods.end(), ModUtils::GetLibName(mod.first)) != noNoMods.end()) continue;
+
 		std::string toggleName = ModUtils::GetModName(mod.first);
 		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName);
 
@@ -167,6 +170,7 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		if (coreModDesc != nullptr)	{ GameObject::Destroy(coreModDesc->get_gameObject()); coreModDesc = nullptr; }
 
 		ClearModToggles();
+		restartButton->set_interactable(false);
 	}
 
 	ModUtils::GetOddLibNames();
