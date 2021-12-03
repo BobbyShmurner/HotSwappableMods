@@ -52,13 +52,6 @@ Logger& getLogger() {
     return *logger;
 }
 
-custom_types::Helpers::Coroutine DestroyBSQ() {
-    co_yield reinterpret_cast<System::Collections::IEnumerator*>(CRASH_UNLESS(UnityEngine::WaitForEndOfFrame::New_ctor()));
-    HookTracker::RemoveHooks();
-
-    co_return;
-}
-
 // Called at the early stages of game loading
 extern "C" void setup(ModInfo& info) {
     info.id = ID;

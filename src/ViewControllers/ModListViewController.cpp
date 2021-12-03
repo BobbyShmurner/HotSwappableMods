@@ -64,6 +64,7 @@ TMPro::TextMeshProUGUI* coreModDesc;
 
 HMUI::NoTransitionsButton* BackButton;
 UnityEngine::UI::Button* restartButton;
+UnityEngine::UI::Button* cancelButton;
 
 UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool isHiddenMod, bool isModLoaded) {
 	if (isCurrentlyEnabled != toggleValue) {
@@ -202,14 +203,35 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 	if (!firstActivation) return;
 
+	// Bottom Pannel
+
+	UnityEngine::UI::HorizontalLayoutGroup* bottomPannel = QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(get_transform());
+
+	bottomPannel->get_transform()->set_position({0, 0.2f, 4.35f});
+
+	bottomPannel->set_spacing(2);
+	bottomPannel->set_childAlignment(UnityEngine::TextAnchor::MiddleCenter);
+
+	bottomPannel->set_childForceExpandWidth(false);
+	bottomPannel->set_childForceExpandHeight(false);
+	bottomPannel->set_childControlWidth(false);
+	bottomPannel->set_childControlHeight(false);
+
+	bottomPannel->dyn_m_TotalMinSize() = {70, 10};
+	bottomPannel->dyn_m_TotalPreferredSize() = {70, 10};
+
+	// Cancel Button
+
+	cancelButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Cancel", {"CancelButton"}, [](){
+		BackButton->get_onClick()->Invoke();
+	});
+
 	// Restart Button
 
-	restartButton = QuestUI::BeatSaberUI::CreateUIButton(get_transform(), "Reload Mods", {"ApplyButton"}, [](){
+	restartButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", {"ApplyButton"}, [](){
 		ModUtils::SetModsActive(modsToToggle);
         ModUtils::RestartBS();
 	});
-
-	restartButton->get_transform()->set_position({0, 0.2f, 4.35f});
 	restartButton->set_interactable(false);
 }
 
