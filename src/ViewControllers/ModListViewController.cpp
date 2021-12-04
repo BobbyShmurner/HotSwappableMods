@@ -59,6 +59,7 @@ std::list<std::string>* modsToToggle = new std::list<std::string>();
 UnityEngine::GameObject* mainContainer;
 
 TMPro::TextMeshProUGUI* modText;
+TMPro::TextMeshProUGUI* noModsText;
 TMPro::TextMeshProUGUI* coreModText;
 TMPro::TextMeshProUGUI* coreModDesc;
 
@@ -118,9 +119,11 @@ void ClearModToggles() {
 	modToggles->clear();
 }
 
-void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool isHiddenMods) {
+int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool isHiddenMods) {
 	std::list<std::string> modsToHide = HiddenModConfigUtils::GetHiddenModsList();
 	std::list<std::string> noNoMods = HiddenModConfigUtils::GetNoNoModsList();
+
+	int togglesCreated = 0;
 
 	for (std::pair<std::string, bool> mod : *mods) {
 		if (std::find(noNoMods.begin(), noNoMods.end(), ModUtils::GetLibName(mod.first)) != noNoMods.end()) continue;
@@ -135,7 +138,10 @@ void PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<st
 		}
 		
 		CreateModToggle(container, toggleName, mod.second, isHiddenMods);
+		togglesCreated++;
 	}
+
+	return togglesCreated;
 }
 
 void PopulateModsEnabledMap() {
@@ -168,6 +174,7 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		if (modText != nullptr) 	{ GameObject::Destroy(modText->get_gameObject()); modText = nullptr; }
 		if (coreModText != nullptr)	{ GameObject::Destroy(coreModText->get_gameObject()); coreModText = nullptr; }
 		if (coreModDesc != nullptr)	{ GameObject::Destroy(coreModDesc->get_gameObject()); coreModDesc = nullptr; }
+		if (noModsText != nullptr)	{ GameObject::Destroy(noModsText->get_gameObject()); noModsText = nullptr; }
 
 		ClearModToggles();
 		restartButton->set_interactable(false);
@@ -186,7 +193,12 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	modText->set_fontSize(10.0f);
 	modText->set_alignment(TMPro::TextAlignmentOptions::Center);
 
-	PopulateModToggles(mainContainer->get_transform(), modsEnabled, false);
+	int modCount = PopulateModToggles(mainContainer->get_transform(), modsEnabled, false);
+
+	if (modCount == 0) {
+		noModsText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "No Mods Found!", false);
+		noModsText->set_alignment(TMPro::TextAlignmentOptions::Center);
+	}
 
 	// Core Mods
 
