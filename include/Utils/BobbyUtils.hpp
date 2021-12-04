@@ -15,5 +15,10 @@ namespace BobbyUtils {
 	std::string ToString(T obj);
 	std::string Il2cppStrToStr(Il2CppString* str);
 
-	void LogHierarchy(UnityEngine::Transform* trans, int level = 0);
+	void LogComponents(UnityEngine::GameObject* go);
+
+	void LogHierarchy(UnityEngine::Transform* trans, int parents = 0);
+	void LogComponentHierarchy(UnityEngine::GameObject* go, int parents = 0);
+
+	void LogHierarchyRecurse(UnityEngine::Transform* trans, int parents = 0, int level = 0, UnityEngine::Transform* ogTrans = nullptr, bool logComponents = false);
 }
