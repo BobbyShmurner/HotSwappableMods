@@ -36,7 +36,6 @@ namespace ModUtils {
 		std::list<std::string> modFileNames = GetDirContents(ModPath);
 
 		for (std::string modFileName : modFileNames) {
-			getLogger().info("ModFileName: %s, ModLibName: %s, libName: %s", modFileName.c_str(), GetLibName(modFileName).c_str(), libName.c_str());
 			if (!strcmp(GetLibName(modFileName).c_str(), libName.c_str())) return modFileName;
 		}
 
@@ -182,7 +181,6 @@ namespace ModUtils {
 		std::list<std::string> loadedMods;
 		for (std::pair<std::string, const Mod> modPair : Modloader::getMods()) {
 			loadedMods.emplace_front(modPair.second.name);
-			getLogger().info("Got File Name %s", modPair.second.name.c_str());
 		}
 
 		return loadedMods;

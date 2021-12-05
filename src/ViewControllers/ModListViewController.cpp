@@ -234,8 +234,6 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		PopulateModToggles(mainContainer->get_transform(), modsEnabled, true);
 	}
 
-	getLogger().info("Loaded UI!");
-
 	if (!firstActivation) return;
 
 	// Bottom Pannel
