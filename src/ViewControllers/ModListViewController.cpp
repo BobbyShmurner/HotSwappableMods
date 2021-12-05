@@ -17,6 +17,7 @@
 #include "UnityEngine/Events/UnityAction.hpp"
 #include "UnityEngine/Events/UnityAction_1.hpp"
 #include "HMUI/ScrollView.hpp"
+#include "HMUI/HoverHint.hpp"
 #include "HMUI/ModalView.hpp"
 #include "HMUI/Touchable.hpp"
 #include "HMUI/CurvedCanvasSettings.hpp"
@@ -91,6 +92,19 @@ UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool 
 	return {1.0f, 1.0f, 1.0f, 1.0f};
 }
 
+void GenerateModHoverHint(UnityEngine::GameObject* go, std::string fileName) {
+	std::string hoverMessage = "";
+
+	hoverMessage += string_format("File Name - %s", fileName.c_str());
+
+	if (!ModUtils::IsDisabled(fileName)) {
+		if (ModUtils::IsModLoaded(fileName)) hoverMessage += string_format("\nMod ID - %s", ModUtils::GetModID(fileName).c_str());
+		else hoverMessage += string_format("\nFailed To Load! Reason - %s", ModUtils::GetModError(fileName)->c_str());
+	}
+
+	HMUI::HoverHint* hoverHint = QuestUI::BeatSaberUI::AddHoverHint(go, std::string_view(hoverMessage));
+}
+
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isHiddenMod) {
 	std::string fileName = ModUtils::GetFileName(toggleName);
 
@@ -108,6 +122,11 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 
 	TMPro::TextMeshProUGUI* textMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
 	textMesh->set_color(GetTextColor(modsEnabled->at(fileName), modsEnabled->at(fileName), isHiddenMod, ModUtils::IsModLoaded(fileName)));
+	textMesh->get_gameObject()->AddComponent(csTypeOf(HMUI::Touchable*));
+
+	BobbyUtils::LogComponentHierarchy(newToggle->get_gameObject(), 1);
+	BobbyUtils::LogComponents(textMesh->get_gameObject());
+	GenerateModHoverHint(newToggle->get_transform()->get_parent()->get_gameObject(), fileName);
 }
 
 void ClearModToggles() {

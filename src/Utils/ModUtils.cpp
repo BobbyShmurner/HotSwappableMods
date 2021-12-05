@@ -3,6 +3,9 @@
 
 #include "DataTypes/MainConfig.hpp"
 
+#include <dlfcn.h>
+#include <dirent.h>
+
 #include "main.hpp"
 
 namespace ModUtils {
@@ -164,6 +167,17 @@ namespace ModUtils {
 		return Modloader::getMods().at(displayName).name;
 	}
 
+	std::string GetModID(std::string name) {
+		std::string fileName = GetFileName(name);
+		std::unordered_map<std::string, const Mod> mods = Modloader::getMods();
+		
+		for (std::pair<std::string, const Mod> modPair : mods) {
+			if (!strcmp(fileName.c_str(), modPair.second.name.c_str())) return modPair.second.info.id;
+		}
+
+		return {"Null"};
+	}
+
 	std::list<std::string> GetLoadedModsFileNames() {
 		std::list<std::string> loadedMods;
 		for (std::pair<std::string, const Mod> modPair : Modloader::getMods()) {
@@ -172,6 +186,18 @@ namespace ModUtils {
 		}
 
 		return loadedMods;
+	}
+
+	// Thanks for Laurie for the original code snippet: 
+	std::optional<std::string> GetModError(std::string name) {
+		std::string fileName = GetFileName(name);
+		std::string filePath = Modloader::getDestinationPath() + fileName;
+		
+		dlerror(); // Clear Existing Errors
+		dlopen(filePath.c_str(), RTLD_LOCAL | RTLD_NOW);
+
+		char* error = dlerror();
+		return error ? std::optional(std::string(error).substr(15)) : std::nullopt;
 	}
 
 	void RestartBS() {

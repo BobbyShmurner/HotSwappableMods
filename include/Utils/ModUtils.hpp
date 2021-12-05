@@ -41,8 +41,11 @@ namespace ModUtils {
     std::string GetFileName(std::string name);
 
 	std::string GetFileNameFromDisplayName(std::string displayName);
+	std::string GetModID(std::string name);
 	std::list<std::string> GetLoadedModsNames();
 	std::list<std::string> GetLoadedModsFileNames();
+
+	std::optional<std::string> GetModError(std::string name);
 
 	void RestartBS();
 
