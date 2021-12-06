@@ -125,8 +125,6 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 	textMesh->set_color(GetTextColor(modsEnabled->at(fileName), modsEnabled->at(fileName), isHiddenMod, ModUtils::IsModLoaded(fileName)));
 	textMesh->get_gameObject()->AddComponent<HMUI::Touchable*>();
 
-	BobbyUtils::LogComponentHierarchy(newToggle->get_gameObject(), 1);
-	BobbyUtils::LogComponents(textMesh->get_gameObject());
 	GenerateModHoverHint(newToggle->get_transform()->get_parent()->get_gameObject(), fileName);
 }
 
