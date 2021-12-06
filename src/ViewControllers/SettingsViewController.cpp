@@ -70,7 +70,7 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 	titleText->set_alignment(TMPro::TextAlignmentOptions::Center);
 
 	QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Always show file names", getMainConfig().AlwaysShowFileNames.GetValue(), [](bool value){
-		ModUtils::UpdateAlwaysDisplayLibNames(value);
+		getMainConfig().AlwaysShowFileNames.SetValue(value);
 	});
 
 	// Advanced Settings

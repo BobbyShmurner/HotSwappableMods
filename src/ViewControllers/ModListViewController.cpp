@@ -18,6 +18,7 @@
 #include "UnityEngine/Events/UnityAction_1.hpp"
 #include "HMUI/ScrollView.hpp"
 #include "HMUI/HoverHint.hpp"
+#include "HMUI/HoverHintController.hpp"
 #include "HMUI/ModalView.hpp"
 #include "HMUI/Touchable.hpp"
 #include "HMUI/CurvedCanvasSettings.hpp"
@@ -122,7 +123,7 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 
 	TMPro::TextMeshProUGUI* textMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
 	textMesh->set_color(GetTextColor(modsEnabled->at(fileName), modsEnabled->at(fileName), isHiddenMod, ModUtils::IsModLoaded(fileName)));
-	textMesh->get_gameObject()->AddComponent(csTypeOf(HMUI::Touchable*));
+	textMesh->get_gameObject()->AddComponent<HMUI::Touchable*>();
 
 	BobbyUtils::LogComponentHierarchy(newToggle->get_gameObject(), 1);
 	BobbyUtils::LogComponents(textMesh->get_gameObject());
@@ -200,7 +201,6 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	}
 
 	ModUtils::GetOddLibNames();
-	ModUtils::UpdateAlwaysDisplayLibNames(getMainConfig().AlwaysShowFileNames.GetValue());
 
 	PopulateModsEnabledMap();
 
