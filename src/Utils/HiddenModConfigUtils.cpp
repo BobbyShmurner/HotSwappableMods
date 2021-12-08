@@ -20,7 +20,7 @@ extern ModInfo modInfo;
 
 namespace HiddenModConfigUtils {
 	std::list<std::string> BaseCoreMods = { {"libpinkcore"}, {"libsongdownloader"}, {"libsongloader"}, {"libplaylistmanager"} };
-	std::list<std::string> NoNoMods = { {"libHotSwappableMods"}, {"libmain"}, {"libmodloader"} }; // These cant be disabled no matter what
+	std::list<std::string> NoNoMods = { {"libHotSwappableMods"}, {"libmain"}, {"libmodloader"}, {"libModUtils"} }; // These cant be disabled no matter what
 
 	std::string ConfigDir = "/sdcard/Android/data/com.beatgames.beatsaber/files/HotSwappableMods/";
 	std::string ConfigName = "modstohide.json";
