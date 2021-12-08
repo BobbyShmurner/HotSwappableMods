@@ -29,10 +29,12 @@ std::string BobbyUtils::Il2cppStrToStr(Il2CppString* str) {
 void BobbyUtils::LogComponents(UnityEngine::GameObject* go) {
 	getLogger().info("Logging Componts for %s", Il2cppStrToStr(go->get_name()).c_str());
 
-	Array<UnityEngine::Component*>* components = go->GetComponents(csTypeOf(UnityEngine::Component*));
+	Array<UnityEngine::Component*>* components = go->GetComponents<UnityEngine::Component*>();
+
+	getLogger().info("Got Components!");
 
 	for(int i = 0; i < components->Length(); i++) {
-		getLogger().info("- [%i] %s", i, ToString(*components->GetValue(i)).c_str());
+		getLogger().info("- [%i] %s", i, ToString(components->GetValue(i)).c_str());
 	}
 }
 
@@ -59,7 +61,7 @@ void BobbyUtils::LogHierarchyRecurse(UnityEngine::Transform* trans, int parents,
 			Array<UnityEngine::Component*>* components = trans->GetChild(i)->GetComponents(csTypeOf(UnityEngine::Component*));
 
 			for(int j = 0; j < components->Length(); j++) {
-				getLogger().info("%s[%i:%i] %s%s", start.c_str(), i, j, ToString(*components->GetValue(j)).c_str(), ogTrans == trans->GetChild(i) ? " (OBJECT BEING LOGGED)" : "");
+				getLogger().info("%s[%i:%i] %s%s", start.c_str(), i, j, ToString(components->GetValue(j)).c_str(), ogTrans == trans->GetChild(i) ? " (OBJECT BEING LOGGED)" : "");
 			}
 		}
 		else {
@@ -74,6 +76,6 @@ void BobbyUtils::LogHierarchy(UnityEngine::Transform* trans, int parents) {
 	LogHierarchyRecurse(trans, parents, 0, trans, false);
 }
 
-void BobbyUtils::LogComponentHierarchy(UnityEngine::GameObject* go, int parents) {
-	LogHierarchyRecurse(go->get_transform(), parents, 0, go->get_transform(), true);
+void BobbyUtils::LogComponentHierarchy(UnityEngine::Transform* trans, int parents) {
+	LogHierarchyRecurse(trans, parents + 1, 0, trans, true);
 }

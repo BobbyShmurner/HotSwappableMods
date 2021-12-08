@@ -10,6 +10,7 @@
 #include "UnityEngine/RectTransform.hpp"
 #include "UnityEngine/Resources.hpp"
 #include "UnityEngine/Vector2.hpp"
+#include "UnityEngine/Canvas.hpp"
 #include "UnityEngine/UI/Image.hpp"
 #include "UnityEngine/UI/Toggle.hpp"
 #include "UnityEngine/UI/Toggle_ToggleEvent.hpp"
@@ -93,7 +94,7 @@ UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool 
 	return {1.0f, 1.0f, 1.0f, 1.0f};
 }
 
-void GenerateModHoverHint(UnityEngine::GameObject* go, std::string fileName) {
+void GenerateModHoverHint(UnityEngine::GameObject* toggle, UnityEngine::GameObject* text, std::string fileName) {
 	std::string hoverMessage = "";
 
 	hoverMessage += string_format("File Name - %s", fileName.c_str());
@@ -103,7 +104,12 @@ void GenerateModHoverHint(UnityEngine::GameObject* go, std::string fileName) {
 		else hoverMessage += string_format("\nFailed To Load! Reason - %s", ModUtils::GetModError(fileName)->c_str());
 	}
 
-	HMUI::HoverHint* hoverHint = QuestUI::BeatSaberUI::AddHoverHint(go, std::string_view(hoverMessage));
+	QuestUI::BeatSaberUI::AddHoverHint(toggle, std::string_view(hoverMessage));
+	QuestUI::BeatSaberUI::AddHoverHint(text, std::string_view(hoverMessage));
+
+	text->AddComponent<UnityEngine::UI::LayoutElement*>();
+
+	BobbyUtils::LogComponents(text);
 }
 
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isHiddenMod) {
@@ -123,9 +129,8 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 
 	TMPro::TextMeshProUGUI* textMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
 	textMesh->set_color(GetTextColor(modsEnabled->at(fileName), modsEnabled->at(fileName), isHiddenMod, ModUtils::IsModLoaded(fileName)));
-	textMesh->get_gameObject()->AddComponent<HMUI::Touchable*>();
 
-	GenerateModHoverHint(newToggle->get_transform()->get_parent()->get_gameObject(), fileName);
+	GenerateModHoverHint(newToggle->get_transform()->get_parent()->get_gameObject(), textMesh->get_gameObject(), fileName);
 }
 
 void ClearModToggles() {
@@ -245,8 +250,6 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 
 	modal->Show(true, true, nullptr);
 
-	BobbyUtils::LogHierarchy(modal->get_transform(), 1);
-
 	return true;
 }
 
@@ -287,6 +290,11 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	modText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Mod List", false);
 	modText->set_fontSize(10.0f);
 	modText->set_alignment(TMPro::TextAlignmentOptions::Center);
+
+	QuestUI::BeatSaberUI::AddHoverHint(modText->get_gameObject(), "gamer moment");
+
+	getLogger().info("This one is the mod text");
+	BobbyUtils::LogComponents(modText->get_gameObject());
 
 	int modCount = PopulateModToggles(mainContainer->get_transform(), modsEnabled, false);
 
