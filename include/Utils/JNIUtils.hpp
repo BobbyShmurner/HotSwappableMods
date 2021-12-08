@@ -10,8 +10,8 @@
 // Log Function
 
 #define LOG_JNI_FUNCTION(env, objectToTest) \
-if (objectToTest == nullptr) { __android_log_print(ANDROID_LOG_ERROR, "HotSwappableMods", "Failed to get \"%s\"", ""#objectToTest); } \
-else { __android_log_print(ANDROID_LOG_VERBOSE, "HotSwappableMods", "Got \"%s\"", ""#objectToTest); } \
+if (objectToTest == nullptr) { __android_log_print(ANDROID_LOG_ERROR, "HotSwappableMods [JNI]", "Failed to get \"%s\"", ""#objectToTest); } \
+else { __android_log_print(ANDROID_LOG_VERBOSE, "HotSwappableMods [JNI]", "Got \"%s\"", ""#objectToTest); } \
 
 // Get Class
 
