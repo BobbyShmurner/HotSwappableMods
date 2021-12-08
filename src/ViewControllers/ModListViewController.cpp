@@ -70,6 +70,11 @@ HMUI::NoTransitionsButton* BackButton;
 UnityEngine::UI::Button* restartButton;
 UnityEngine::UI::Button* cancelButton;
 
+std::string GetDisplayName(std::string name) {
+	if (getMainConfig().AlwaysShowFileNames.GetValue()) return ModUtils::GetLibName(name);
+	else return ModUtils::GetModID(name);
+}
+
 UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool isHiddenMod, bool isModLoaded) {
 	if (isCurrentlyEnabled != toggleValue) {
 			if (isHiddenMod) {
@@ -145,7 +150,7 @@ void ClearModToggles() {
 }
 
 int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool isHiddenMods) {
-	std::list<std::string>* modsToHide = ModUtils::GetCoreMods();
+	std::list<std::string> modsToHide = ModUtils::GetCoreMods();
 	std::list<std::string> noNoMods = HiddenModConfigUtils::GetNoNoModsList();
 
 	int togglesCreated = 0;
@@ -153,10 +158,10 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std
 	for (std::pair<std::string, bool> mod : *mods) {
 		if (std::find(noNoMods.begin(), noNoMods.end(), ModUtils::GetLibName(mod.first)) != noNoMods.end()) continue;
 
-		std::string toggleName = ModUtils::GetModName(mod.first);
-		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName);
+		std::string toggleName = GetDisplayName(mod.first);
+		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName); // GetModID will return the file name is the mod isnt loaded, so just remove the file extension by getting the lib
 
-		if (std::find(modsToHide->begin(), modsToHide->end(), ModUtils::GetLibName(mod.first)) != modsToHide->end()){
+		if (std::find(modsToHide.begin(), modsToHide.end(), ModUtils::GetLibName(mod.first)) != modsToHide.end()){
 			if (!isHiddenMods) continue;
 		} else {
 			if (isHiddenMods) continue;
@@ -214,7 +219,7 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 	QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Are you sure you wanna dissable to following core mods?\n"}, false)->set_alignment(TMPro::TextAlignmentOptions::Center);
 
 	for (std::string mod : coreModsDisabled) {
-		TMPro::TextMeshProUGUI* modText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), std::string_view("- " + ModUtils::GetModName(mod)), false);
+		TMPro::TextMeshProUGUI* modText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), std::string_view("- " + GetDisplayName(mod)), false);
 
 		modText->set_alignment(TMPro::TextAlignmentOptions::Center);
 		modText->set_color({1, 0, 0, 1});
@@ -290,11 +295,6 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	modText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Mod List", false);
 	modText->set_fontSize(10.0f);
 	modText->set_alignment(TMPro::TextAlignmentOptions::Center);
-
-	QuestUI::BeatSaberUI::AddHoverHint(modText->get_gameObject(), "gamer moment");
-
-	getLogger().info("This one is the mod text");
-	BobbyUtils::LogComponents(modText->get_gameObject());
 
 	int modCount = PopulateModToggles(mainContainer->get_transform(), modsEnabled, false);
 
