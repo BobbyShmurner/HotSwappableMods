@@ -135,10 +135,12 @@ void ClearModToggles() {
 	}
 
 	modToggles->clear();
+	modsToToggle->clear();
+	modsEnabled->clear();
 }
 
 int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool isHiddenMods) {
-	std::list<std::string> modsToHide = HiddenModConfigUtils::GetHiddenModsList();
+	std::list<std::string>* modsToHide = ModUtils::GetCoreMods();
 	std::list<std::string> noNoMods = HiddenModConfigUtils::GetNoNoModsList();
 
 	int togglesCreated = 0;
@@ -149,7 +151,7 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std
 		std::string toggleName = ModUtils::GetModName(mod.first);
 		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName);
 
-		if (std::find(modsToHide.begin(), modsToHide.end(), ModUtils::GetLibName(mod.first)) != modsToHide.end()){
+		if (std::find(modsToHide->begin(), modsToHide->end(), ModUtils::GetLibName(mod.first)) != modsToHide->end()){
 			if (!isHiddenMods) continue;
 		} else {
 			if (isHiddenMods) continue;
@@ -173,6 +175,81 @@ void PopulateModsEnabledMap() {
 	}
 }
 
+bool CoreModModal(UnityEngine::Transform* trans) {
+	std::list<std::string> coreModsDisabled = std::list<std::string>();
+
+	for (std::string mod : *modsToToggle) {
+		if (ModUtils::IsCoreMod(mod) && modsEnabled->at(mod)) {
+			coreModsDisabled.emplace_front(mod);
+		}
+	}
+
+	if (coreModsDisabled.size() == 0) return false;
+
+	HMUI::ModalView* modal = QuestUI::BeatSaberUI::CreateModal(trans, {80, 60}, nullptr, true);
+	
+	UnityEngine::UI::VerticalLayoutGroup* modalLayout = QuestUI::BeatSaberUI::CreateVerticalLayoutGroup(modal->get_transform());
+
+	modalLayout->get_rectTransform()->set_anchorMin({0, 0.2f});
+	modalLayout->get_rectTransform()->set_anchorMax({1, 1});
+
+	modalLayout->set_padding(UnityEngine::RectOffset::New_ctor(2, 2, 2, 2));
+	modalLayout->set_childAlignment(UnityEngine::TextAnchor::UpperCenter);
+	
+	modalLayout->set_childControlHeight(true);
+	modalLayout->set_childForceExpandHeight(false);
+	modalLayout->set_childControlWidth(false);
+	modalLayout->set_childForceExpandWidth(true);
+
+	TMPro::TextMeshProUGUI* modalWarnText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Warning!"}, false);
+	modalWarnText->set_alignment(TMPro::TextAlignmentOptions::Center);
+	modalWarnText->set_color({1, 0, 0, 1});
+	modalWarnText->set_fontSize(8);
+
+	QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Are you sure you wanna dissable to following core mods?\n"}, false)->set_alignment(TMPro::TextAlignmentOptions::Center);
+
+	for (std::string mod : coreModsDisabled) {
+		TMPro::TextMeshProUGUI* modText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), std::string_view("- " + ModUtils::GetModName(mod)), false);
+
+		modText->set_alignment(TMPro::TextAlignmentOptions::Center);
+		modText->set_color({1, 0, 0, 1});
+	}
+
+	UnityEngine::UI::HorizontalLayoutGroup* bottomPannel = QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(modal->get_transform());
+
+	bottomPannel->get_rectTransform()->set_pivot({0.5f, 0});
+	bottomPannel->get_rectTransform()->set_anchoredPosition({0, 0});
+
+	bottomPannel->get_rectTransform()->set_anchorMin({0, 0});
+	bottomPannel->get_rectTransform()->set_anchorMax({1, 0});
+
+	bottomPannel->set_spacing(2);
+	bottomPannel->set_childAlignment(UnityEngine::TextAnchor::MiddleCenter);
+
+	bottomPannel->set_childForceExpandWidth(false);
+	bottomPannel->set_childForceExpandHeight(false);
+	bottomPannel->set_childControlWidth(false);
+	bottomPannel->set_childControlHeight(false);
+
+	bottomPannel->dyn_m_TotalMinSize() = {60, 5};
+	bottomPannel->dyn_m_TotalPreferredSize() = {60, 5};
+	
+	UnityEngine::UI::Button* cancel = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Cancel", {"CancelButton"}, [&](){
+		mainContainer->get_transform()->get_parent()->get_parent()->get_parent()->get_parent()->GetComponentInChildren<HMUI::ModalView*>()->Hide(true, nullptr);
+	});
+
+	UnityEngine::UI::Button* confirm = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Im Sure", {"ApplyButton"}, [&](){
+		ModUtils::SetModsActive(modsToToggle);
+		ModUtils::RestartBS();
+	});
+
+	modal->Show(true, true, nullptr);
+
+	BobbyUtils::LogHierarchy(modal->get_transform(), 1);
+
+	return true;
+}
+
 void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
 	if (firstActivation) {
 		mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
@@ -182,6 +259,7 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 		// Dont wanna use the clear functions, as it will lead to nullptr derefrences. So we just manually clear them
 		modToggles->clear();
+		modsToToggle->clear();
 		modsEnabled->clear();
 
 		// Same idea with the text
@@ -258,10 +336,11 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	});
 
 	// Restart Button
-
-	restartButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", {"ApplyButton"}, [](){
+	restartButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", {"ApplyButton"}, [&](){
+		if (getMainConfig().ShowCoreMods.GetValue() && CoreModModal(get_transform())) return;
+		
 		ModUtils::SetModsActive(modsToToggle);
-        ModUtils::RestartBS();
+		ModUtils::RestartBS();
 	});
 	restartButton->set_interactable(false);
 }

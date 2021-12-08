@@ -2,6 +2,7 @@
 #include "Utils/JNIUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
+#include "Utils/HiddenModConfigUtils.hpp"
 
 #include <dlfcn.h>
 #include <dirent.h>
@@ -10,6 +11,8 @@
 
 const char* ModUtils::m_ModPath;
 std::list<std::string>* ModUtils::m_OddLibNames;
+std::list<std::string>* ModUtils::m_CoreMods;
+std::list<std::string>* ModUtils::m_LoadedMods;
 
 JavaVM* ModUtils::m_Jvm;
 
@@ -88,9 +91,11 @@ bool ModUtils::IsOddLibName(std::string name) {
 }
 
 bool ModUtils::IsModLoaded(std::string name) {
-	std::list<std::string> loadedModsLibNames = GetLoadedModsFileNames();
+	return (std::find(m_LoadedMods->begin(), m_LoadedMods->end(), GetFileName(name)) != m_LoadedMods->end());
+}
 
-	return (std::find(loadedModsLibNames.begin(), loadedModsLibNames.end(), GetFileName(name)) != loadedModsLibNames.end());
+bool ModUtils::IsCoreMod(std::string name) {
+	return (std::find(m_CoreMods->begin(), m_CoreMods->end(), GetLibName(name)) != m_CoreMods->end());
 }
 
 // Mod Name = Mod Name
@@ -169,13 +174,12 @@ std::string ModUtils::GetModID(std::string name) {
 	return {"Null"};
 }
 
-std::list<std::string> ModUtils::GetLoadedModsFileNames() {
-	std::list<std::string> loadedMods;
-	for (std::pair<std::string, const Mod> modPair : Modloader::getMods()) {
-		loadedMods.emplace_front(modPair.second.name);
-	}
+std::list<std::string>* ModUtils::GetLoadedModsFileNames() {
+	return m_LoadedMods;
+}
 
-	return loadedMods;
+std::list<std::string>* ModUtils::GetCoreMods() {
+	return m_CoreMods;
 }
 
 // Thanks for Laurie for the original code snippet: 
@@ -240,7 +244,6 @@ void ModUtils::RestartBS() {
 	GET_JCLASS(env, processClass, "android/os/Process", jclass);
 
 	CALL_STATIC_JINT_METHOD(env, pid, processClass, "myPid", "()I", jint);
-	getLogger().info("-- RESTARTING --");
 	CALL_STATIC_VOID_METHOD(env, processClass, killProcess, "(I)V", pid);
 }
 
@@ -249,10 +252,26 @@ void ModUtils::CacheJVM() {
 	env->GetJavaVM(&m_Jvm);
 }
 
-void __attribute__((constructor)) ModUtils::DlOpened() {
-	m_OddLibNames = new std::list<std::string>();
-	m_ModPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
+void ModUtils::CollectCoreMods() {
+	// TODO: Get Core Mods From BMBF, and phase out HiddenModConfigUtils
+}
 
+void ModUtils::CollectLoadedMods() {
+	for (std::pair<std::string, const Mod> modPair : Modloader::getMods()) {
+		m_LoadedMods->emplace_front(modPair.second.name);
+	}
+}
+
+void ModUtils::Init() {
+	m_OddLibNames = new std::list<std::string>();
+	m_LoadedMods = new std::list<std::string>();
+	m_ModPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
+	m_CoreMods = HiddenModConfigUtils::GetCoreMods();
+	
+	CollectLoadedMods();
+}
+
+void __attribute__((constructor)) ModUtils::DlOpened() {
 	__android_log_print(ANDROID_LOG_VERBOSE, "HotSwappableMods", "Getting m_Jvm...");
 	CacheJVM();
 

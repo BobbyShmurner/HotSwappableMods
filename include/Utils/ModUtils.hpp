@@ -20,6 +20,7 @@ public:
 	static bool IsDisabled(std::string name);
 	static bool IsOddLibName(std::string name);
 	static bool IsModLoaded(std::string name);
+	static bool IsCoreMod(std::string name);
 
     // Mod Name = Mod Name
     // Lib Name = libmodname
@@ -41,17 +42,23 @@ public:
 
 	static std::string GetFileNameFromDisplayName(std::string displayName);
 	static std::string GetModID(std::string name);
-	static std::list<std::string> GetLoadedModsNames();
-	static std::list<std::string> GetLoadedModsFileNames();
+	static std::list<std::string>* GetLoadedModsFileNames();
 
+	static std::list<std::string>* GetCoreMods();
 	static std::optional<std::string> GetModError(std::string name);
 
 	static void RestartBS();
+	static void Init();
 private:
 	static const char* m_ModPath;
 	static std::list<std::string>* m_OddLibNames;
+	static std::list<std::string>* m_CoreMods;
+	static std::list<std::string>* m_LoadedMods;
 
 	static JavaVM* m_Jvm;
+
+	static void CollectCoreMods();
+	static void CollectLoadedMods();
 
 	static void CacheJVM();
 	static void __attribute__((constructor)) DlOpened();

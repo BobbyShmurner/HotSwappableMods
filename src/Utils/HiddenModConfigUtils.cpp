@@ -19,7 +19,7 @@
 extern ModInfo modInfo;
 
 namespace HiddenModConfigUtils {
-	std::list<std::string> ModsToHide = { {"libpinkcore"}, {"libsongdownloader"}, {"libsongloader"}, {"libplaylistmanager"} };
+	std::list<std::string> BaseCoreMods = { {"libpinkcore"}, {"libsongdownloader"}, {"libsongloader"}, {"libplaylistmanager"} };
 	std::list<std::string> NoNoMods = { {"libHotSwappableMods"}, {"libmain"}, {"libmodloader"} }; // These cant be disabled no matter what
 
 	std::string ConfigDir = "/sdcard/Android/data/com.beatgames.beatsaber/files/HotSwappableMods/";
@@ -27,9 +27,11 @@ namespace HiddenModConfigUtils {
 
 	std::string ConfigLoc = ConfigDir + ConfigName;
 
-	void SetModsToHide() {
+	std::list<std::string>* GetCoreMods() {
 		std::string configPath = ConfigLoc;
+		std::list<std::string>* coreMods = new std::list<std::string>();
 
+		// I have no fucking clue how this works but it makes a dir if it doesnt exist so....
 		struct stat st = {0};
 
 		if (stat(ConfigDir.c_str(), &st) == -1) {
@@ -51,12 +53,12 @@ namespace HiddenModConfigUtils {
 			rapidjson::Value& configModsToHide = configDoc["ModsToHide"];
 
 			if (configModsToHide.IsArray()) {
-				ModsToHide.clear();
+				coreMods->clear();
 				for (rapidjson::SizeType i = 0; i < configModsToHide.Size(); i++) { // rapidjson uses SizeType instead of size_t.
-					ModsToHide.emplace_front(std::string(configModsToHide[i].GetString()));
+					coreMods->emplace_front(std::string(configModsToHide[i].GetString()));
 				}
 
-				return;
+				return coreMods;
 			}
 		}
 
@@ -65,7 +67,7 @@ namespace HiddenModConfigUtils {
 
 		rapidjson::Value ary (rapidjson::kArrayType);
 
-		for (std::string modToHide : ModsToHide) {
+		for (std::string modToHide : BaseCoreMods) {
 			rapidjson::Value modVal;
 
 			char buffer[50];
@@ -89,8 +91,9 @@ namespace HiddenModConfigUtils {
 		configDoc.Accept(writer);
 		
 		fclose(fp);
+
+		return coreMods;
 	}
 
-	std::list<std::string> GetHiddenModsList() { return ModsToHide; }
 	std::list<std::string> GetNoNoModsList() { return NoNoMods; }
 }

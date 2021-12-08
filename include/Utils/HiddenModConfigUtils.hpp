@@ -9,6 +9,6 @@
 namespace HiddenModConfigUtils {
 	void SetModsToHide();
 
-	std::list<std::string> GetHiddenModsList();
+	std::list<std::string>* GetCoreMods();
 	std::list<std::string> GetNoNoModsList();
 }

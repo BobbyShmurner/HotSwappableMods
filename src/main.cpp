@@ -75,8 +75,7 @@ MAKE_HOOK_MATCH(OnBackButton, &UnityEngine::UI::Button::Press, void, UnityEngine
 extern "C" void load() {
     il2cpp_functions::Init();
     getMainConfig().Init(modInfo);
-
-    HiddenModConfigUtils::SetModsToHide();
+    ModUtils::Init();
 
     getLogger().info("Installing hooks...");
     INSTALL_HOOK(getLogger(), OnBackButton);
