@@ -56,6 +56,8 @@ DEFINE_TYPE(HotSwappableMods, SettingsViewController);
 std::list<UnityEngine::GameObject*>* hoverHintSettings = new std::list<UnityEngine::GameObject*>();
 std::list<UnityEngine::GameObject*>* advancedSettings = new std::list<UnityEngine::GameObject*>();
 
+UnityEngine::GameObject* seperatorTemplate = nullptr;
+
 void UpdateAdvandcedSettings(bool enabled) {
 	for (UnityEngine::GameObject* setting : *advancedSettings) {
 		setting->SetActive(enabled);
@@ -69,7 +71,7 @@ void UpdateHoverHintSettings(bool enabled) {
 }
 
 // Fern has insane skill issue
-UnityEngine::GameObject* CreateSeperator(UnityEngine::Transform* parent) {
+void CreateSeperatorTemplate(UnityEngine::Transform* parent) {
 	UnityEngine::Transform* inputTrans = QuestUI::BeatSaberUI::CreateStringSetting(parent, "", "")->get_transform();
 	UnityEngine::GameObject* seperator;
 
@@ -93,9 +95,17 @@ UnityEngine::GameObject* CreateSeperator(UnityEngine::Transform* parent) {
 	UnityEngine::Object::Destroy(inputTrans->GetComponent<HMUI::InputFieldViewStaticAnimations*>());
 	UnityEngine::Object::Destroy(inputTrans->GetComponent<HMUI::Touchable*>());
 
+	inputTrans->get_gameObject()->SetActive(false);
+	seperatorTemplate = inputTrans->get_gameObject();
+}
+
+UnityEngine::GameObject* CreateSeperator(UnityEngine::Transform* parent) {
+	if (seperatorTemplate == nullptr) CreateSeperatorTemplate(parent);
+
+	UnityEngine::GameObject* seperator = UnityEngine::GameObject::Instantiate(seperatorTemplate, parent);
 	seperator->SetActive(true);
 
-	return inputTrans->get_gameObject();
+	return seperator;
 }
 
 void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
