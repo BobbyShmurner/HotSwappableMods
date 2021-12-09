@@ -9,19 +9,22 @@
 
 // Log Function
 
-#define LOG_JNI_FUNCTION(env, objectToTest) \
-if (objectToTest == nullptr) { __android_log_print(ANDROID_LOG_ERROR, "HotSwappableMods [JNI]", "Failed to get \"%s\"", ""#objectToTest); } \
-else { __android_log_print(ANDROID_LOG_VERBOSE, "HotSwappableMods [JNI]", "Got \"%s\"", ""#objectToTest); } \
+#define LOG_JNI_TEST(objectToTest, success, fail) \
+if (objectToTest == nullptr) { __android_log_print(ANDROID_LOG_ERROR, "ModUtils [JNI]", fail, ""#objectToTest); } \
+else { __android_log_print(ANDROID_LOG_VERBOSE, "ModUtils [JNI]", success, ""#objectToTest); }
+
+#define LOG_JNI(message, ...) \
+__android_log_print(ANDROID_LOG_ERROR, "ModUtils [JNI]", message __VA_OPT__(,) __VA_ARGS__)
 
 // Get Class
 
 #define GET_JCLASS(env, className, classPath, type) \
 type className = env->FindClass(classPath); \
-LOG_JNI_FUNCTION(env, className)
+LOG_JNI_TEST(className, "Found Class \"%s\"", "Failed To Find Class \"%s\"")
 
 #define GET_JOBJECT_JCLASS(env, className, object, type) \
 type className = env->GetObjectClass(object); \
-LOG_JNI_FUNCTION(env, className)
+LOG_JNI_TEST(className, "Got Object \"%s\"", "Failed To Get Object \"%s\"")
 
 // New Object
 
@@ -88,20 +91,20 @@ type intName = CALL_METHOD_FROM_JMETHODID_WITHOUT_LOG(env, clazz, CallStaticIntM
 
 #define GET_JMETHODID(env, methodIDName, clazz, methodName, sig) \
 methodIDName = env->GetMethodID(clazz, methodName, sig); \
-LOG_JNI_FUNCTION(env, methodIDName)
+LOG_JNI_TEST(methodIDName, "Got MethodID \"%s\"", "Failed To Get MethodID \"%s\"")
 
 #define GET_STATIC_JMETHODID(env, methodIDName, clazz, methodName, sig) \
 methodIDName = env->GetStaticMethodID(clazz, methodName, sig); \
-LOG_JNI_FUNCTION(env, methodIDName)
+LOG_JNI_TEST(methodIDName, "Got Static MethodID \"%s\"", "Failed To Get Static MethodID \"%s\"")
 
 // Call Method From MethodID
 
 #define CALL_METHOD_FROM_JMETHODID(env, objectName, object, method, methodID, ...) \
 env->method(object, methodID __VA_OPT__(,) __VA_ARGS__); \
-LOG_JNI_FUNCTION(env, objectName)
+LOG_JNI("Called \"%s\" On Object \"%s\"", ""#methodID, ""#objectName)
 
 #define CALL_METHOD_FROM_JMETHODID_WITHOUT_LOG(env, object, method, methodID, ...) \
-env->method(object, methodID __VA_OPT__(,) __VA_ARGS__); \
+env->method(object, methodID __VA_OPT__(,) __VA_ARGS__)
 
 // Get Field
 
@@ -117,23 +120,23 @@ type GET_STATIC_JFIELD_FROM_JFIELDID(env, objectName, clazz, objectName##_FieldI
 
 #define GET_JFIELDID(env, fieldIDName, clazz, fieldName, sig) \
 fieldIDName = env->GetFieldID(clazz, fieldName, sig); \
-LOG_JNI_FUNCTION(env, fieldIDName)
+LOG_JNI_TEST(fieldIDName, "Got FieldID \"%s\"", "Failed To Get FieldID \"%s\"")
 
 #define GET_STATIC_JFIELDID(env, fieldIDName, clazz, fieldName, sig) \
 fieldIDName = env->GetStaticFieldID(clazz, fieldName, sig); \
-LOG_JNI_FUNCTION(env, fieldIDName)
+LOG_JNI_TEST(fieldIDName, "Got Static FieldID \"%s\"", "Failed To Get Static FieldID \"%s\"")
 
 // Get Field From FieldID
 
 #define GET_JFIELD_FROM_JFIELDID(env, objectName, object, fieldID) \
 objectName = env->GetObjectField(object, fieldID); \
-LOG_JNI_FUNCTION(env, objectName)
+LOG_JNI_TEST(objectName, "Got FieldID \"%s\"", "Failed To Get FieldID \"%s\"")
 
 #define GET_STATIC_JFIELD_FROM_JFIELDID(env, objectName, clazz, fieldID) \
 objectName = env->GetStaticObjectField(clazz, fieldID); \
-LOG_JNI_FUNCTION(env, objectName)
+LOG_JNI_TEST(objectName, "Got Static FieldID \"%s\"", "Failed To Get Static FieldID \"%s\"")
 
 // Create Global Object
 #define CREATE_GLOBAL_JOBJECT(env, objectName, object, type) \
 type objectName = env->NewGlobalRef(object); \
-LOG_JNI_FUNCTION(env, objectName)
+LOG_JNI_TEST(objectName, "Created Global \"%s\"", "Failed To Create Global \"%s\"")

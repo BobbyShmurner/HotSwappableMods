@@ -5,8 +5,8 @@
 #include <string>
 #include <dirent.h>
 #include <algorithm>
-
-#include "beatsaber-hook/shared/utils/il2cpp-functions.hpp"
+#include <optional>
+#include <jni.h>
 
 class ModUtils {
 public:
@@ -158,6 +158,15 @@ public:
 	static std::optional<std::string> GetModError(std::string name);
 
 	/**
+	 * @brief Returns a working pointer to a JNI Environment. Use this over Modloader::getJni()
+	 * @details When using Modloader's getJni function, the JNIEnv* that it returns doesnt work on the Unity thread, as JNIEnvs are thread specific.
+	 * @details This function will return a JNIEnv* thar works on the UnityMain Thread
+	 * 
+	 * @return JNI Environment Pointer
+	 */
+	static JNIEnv* GetJNIEnv();
+
+	/**
 	 * @brief Restarts Beat Saber
 	 */
 	static void RestartBS();
@@ -179,5 +188,5 @@ private:
 	static std::string GetFileNameFromModID(std::string modID);
 
 	static void CacheJVM();
-	static void __attribute__((constructor)) DlOpened();
+	static void __attribute__((constructor)) OnDlopen();
 };

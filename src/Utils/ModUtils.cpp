@@ -150,9 +150,7 @@ std::optional<std::string> ModUtils::GetModError(std::string name) {
 	return error ? std::optional(std::string(error).substr(15)) : std::nullopt;
 }
 
-void ModUtils::RestartBS() {
-	getLogger().info("-- STARTING RESTART --");
-
+JNIEnv* ModUtils::GetJNIEnv() {
 	JNIEnv* env;
 
 	JavaVMAttachArgs args;
@@ -161,6 +159,14 @@ void ModUtils::RestartBS() {
 	args.group = NULL;
 
 	m_Jvm->AttachCurrentThread(&env, &args);
+
+	return env;
+}
+
+void ModUtils::RestartBS() {
+	getLogger().info("-- STARTING RESTART --");
+
+	JNIEnv* env = GetJNIEnv();
 
 	jstring packageName = env->NewStringUTF("com.beatgames.beatsaber");
 
@@ -171,7 +177,7 @@ void ModUtils::RestartBS() {
 	// CALL_STATIC_JOBJECT_METHOD(env, activityThread, activityThreadClass, "currentActivityThread", "()Landroid/app/ActivityThread;", jobject);
 	// CALL_JOBJECT_METHOD(env, AppActivity, activityThread, "getApplication", "()Landroid/app/Application;", NOTHING);
 
-	// Get Activity Shit (courtesy of NOT sc2bad)
+	// Get Activity Shit (courtesy of NOT sc2bad (cus he's bad))
 	GET_JCLASS(env, unityPlayerClass, "com/unity3d/player/UnityPlayer", jclass);
 
 	GET_STATIC_JFIELD(env, appActivity, unityPlayerClass, "currentActivity", "Landroid/app/Activity;", jobject);
@@ -257,7 +263,7 @@ void ModUtils::Init() {
 	CollectLoadedMods();
 }
 
-void __attribute__((constructor)) ModUtils::DlOpened() {
+void __attribute__((constructor)) ModUtils::OnDlopen() {
 	__android_log_print(ANDROID_LOG_VERBOSE, "HotSwappableMods", "Getting m_Jvm...");
 	CacheJVM();
 
