@@ -99,7 +99,7 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 	advancedSettings->emplace_front(showCoreMods->get_transform()->get_parent()->get_gameObject());
 
 
-	UnityEngine::UI::Toggle* showLibs = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Libs", getMainConfig().ShowLibs.GetValue(), [](bool value){
+	UnityEngine::UI::Toggle* showLibs = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Libraries", getMainConfig().ShowLibs.GetValue(), [](bool value){
 		getMainConfig().ShowLibs.SetValue(value);
 	});
 	advancedSettings->emplace_front(showLibs->get_transform()->get_parent()->get_gameObject());

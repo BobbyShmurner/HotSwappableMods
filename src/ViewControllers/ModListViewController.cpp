@@ -65,6 +65,9 @@ TMPro::TextMeshProUGUI* modText;
 TMPro::TextMeshProUGUI* noModsText;
 TMPro::TextMeshProUGUI* dangerZoneText;
 TMPro::TextMeshProUGUI* dangerZoneDesc;
+TMPro::TextMeshProUGUI* coreModsText;
+TMPro::TextMeshProUGUI* libsText;
+
 
 HMUI::NoTransitionsButton* BackButton;
 UnityEngine::UI::Button* restartButton;
@@ -291,11 +294,15 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		modText = nullptr;
 		dangerZoneText = nullptr;
 		dangerZoneDesc = nullptr;
+		coreModsText = nullptr;
+		libsText = nullptr;
 	} else {
-		if (modText != nullptr) 	{ GameObject::Destroy(modText->get_gameObject()); modText = nullptr; }
+		if (modText != nullptr) 		{ GameObject::Destroy(modText->get_gameObject()); modText = nullptr; }
+		if (noModsText != nullptr)		{ GameObject::Destroy(noModsText->get_gameObject()); noModsText = nullptr; }
 		if (dangerZoneText != nullptr)	{ GameObject::Destroy(dangerZoneText->get_gameObject()); dangerZoneText = nullptr; }
 		if (dangerZoneDesc != nullptr)	{ GameObject::Destroy(dangerZoneDesc->get_gameObject()); dangerZoneDesc = nullptr; }
-		if (noModsText != nullptr)	{ GameObject::Destroy(noModsText->get_gameObject()); noModsText = nullptr; }
+		if (coreModsText != nullptr)	{ GameObject::Destroy(coreModsText->get_gameObject()); coreModsText = nullptr; }
+		if (libsText != nullptr)		{ GameObject::Destroy(libsText->get_gameObject()); libsText = nullptr; }
 
 		ClearModToggles();
 		restartButton->set_interactable(false);
@@ -323,8 +330,8 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	// Danger Zone
 
 	if (getMainConfig().ShowCoreMods.GetValue() || getMainConfig().ShowLibs.GetValue()) {
-		dangerZoneText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "The Danger Zone", false);
-		dangerZoneText->set_fontSize(10.0f);
+		dangerZoneText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "The Danger Zone!", false);
+		dangerZoneText->set_fontSize(12.0f);
 		dangerZoneText->set_alignment(TMPro::TextAlignmentOptions::Top); // This actually positions it at the bottom. Dont ask me why
 		dangerZoneText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
@@ -333,8 +340,23 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		dangerZoneDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 	}
 
-	if (getMainConfig().ShowCoreMods.GetValue()) PopulateModToggles(mainContainer->get_transform(), modsEnabled, true, false);
-	if (getMainConfig().ShowLibs.GetValue()) PopulateModToggles(mainContainer->get_transform(), modsEnabled, false, true);
+	if (getMainConfig().ShowCoreMods.GetValue()) {
+		coreModsText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Core Mods", false);
+		coreModsText->set_fontSize(10.0f);
+		coreModsText->set_alignment(TMPro::TextAlignmentOptions::Top);
+		coreModsText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+
+		PopulateModToggles(mainContainer->get_transform(), modsEnabled, true, false);
+	}
+
+	if (getMainConfig().ShowLibs.GetValue()) {
+		libsText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Libraries", false);
+		libsText->set_fontSize(10.0f);
+		libsText->set_alignment(TMPro::TextAlignmentOptions::Top);
+		libsText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
+
+		PopulateModToggles(mainContainer->get_transform(), modsEnabled, false, true);
+	}
 
 	if (!firstActivation) return;
 
