@@ -19,18 +19,34 @@ public:
 	static std::list<std::string> GetDirContents(const char* dirPath);
 
 	/**
-	 * @brief Toggles a mod to either be enabled or disabled
+	 * @brief Sets the activity of a specific mod
+	 * 
+	 * @param name The mod to enable or disable
+	 * @param active Whether to enable or disable the mod
+	 */
+	static void SetModActive(std::string name, bool active);
+
+	/**
+	 * @brief Sets the activity of a list of mods
+	 * 
+	 * @param mods The list of mods to enable or disable
+	 * @param active Whether to enable or disable the mods
+	 */
+	static void SetModsActive(std::list<std::string>* mods, bool active);
+
+	/**
+	 * @brief Toggles the activity of a specific mod to either enabled or diabled
 	 * 
 	 * @param name The mod to toggle
 	 */
 	static void ToggleMod(std::string name);
 
 	/**
-	 * @brief Sets a list of mods to be toggled
+	 * @brief Toggles a list of mods on or off
 	 * 
-	 * @param mods The list of mods to be toggles
+	 * @param mods The list of mods to be toggled
 	 */
-	static void SetModsActive(std::list<std::string>* mods);
+	static void ToggleMods(std::list<std::string>* mods);
 
 	/**
 	 * @brief Checks if a mod is disabled for not

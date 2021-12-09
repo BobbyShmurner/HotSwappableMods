@@ -249,7 +249,7 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 	});
 
 	UnityEngine::UI::Button* confirm = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Im Sure", {"ApplyButton"}, [&](){
-		ModUtils::SetModsActive(modsToToggle);
+		ModUtils::ToggleMods(modsToToggle);
 		ModUtils::RestartBS();
 	});
 
@@ -347,7 +347,7 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	restartButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", {"ApplyButton"}, [&](){
 		if (getMainConfig().ShowCoreMods.GetValue() && CoreModModal(get_transform())) return;
 		
-		ModUtils::SetModsActive(modsToToggle);
+		ModUtils::ToggleMods(modsToToggle);
 		ModUtils::RestartBS();
 	});
 	restartButton->set_interactable(false);

@@ -31,25 +31,36 @@ std::list<std::string> ModUtils::GetDirContents(const char* dirPath) {
 	return files;
 }
 
-void ModUtils::ToggleMod(std::string name) {
+void ModUtils::SetModActive(std::string name, bool active) {
+	getLogger().info("%s mod \"%s\"", active ? "Enabling" : "Disabling", GetLibName(name).c_str());
 	std::list<std::string> modFileNames = GetDirContents(m_ModPath);
 
 	for (std::string modFileName : modFileNames) {
 		if (!IsFileName(modFileName)) continue;
 		if (strcmp(modFileName.c_str(), GetFileName(name).c_str())) continue;
 
-		if (IsDisabled(modFileName)) rename(string_format("%s/%s", m_ModPath, modFileName.c_str()).c_str(), string_format("%s/%s.so", m_ModPath, GetLibName(name).c_str()).c_str());
+		if (active) rename(string_format("%s/%s", m_ModPath, modFileName.c_str()).c_str(), string_format("%s/%s.so", m_ModPath, GetLibName(name).c_str()).c_str());
 		else rename(string_format("%s/%s", m_ModPath, modFileName.c_str()).c_str(), string_format("%s/%s.disabled", m_ModPath, GetLibName(name).c_str()).c_str());
 	}
 }
 
-void ModUtils::SetModsActive(std::list<std::string>* mods) {
-	getLogger().info("Setting mod activites");
-	for (std::string modFileName : *mods) {
-		std::string modName = GetModID(modFileName);
+void ModUtils::SetModsActive(std::list<std::string>* mods, bool active) {
+	getLogger().info("%s a list of mods", active ? "Enabling" : "Disabling");
 
-		getLogger().info("Setting Activity For \"%s\"", modName.c_str());
-		ToggleMod(modName);
+	for (std::string modFileName : *mods) {
+		SetModActive(modFileName, active);
+	}
+}
+
+void ModUtils::ToggleMod(std::string name) {
+	SetModActive(name, IsDisabled(name));
+}
+
+void ModUtils::ToggleMods(std::list<std::string>* mods) {
+	getLogger().info("Toggling a list of mods");
+
+	for (std::string modFileName : *mods) {
+		ToggleMod(modFileName);
 	}
 }
 
