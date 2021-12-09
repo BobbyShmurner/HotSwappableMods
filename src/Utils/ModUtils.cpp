@@ -11,9 +11,12 @@ Logger& getLogger();
 
 const char* ModUtils::m_ModPath;
 const char* ModUtils::m_LibPath;
+
 std::list<std::string>* ModUtils::m_OddLibNames;
 std::list<std::string>* ModUtils::m_CoreMods;
 std::list<std::string>* ModUtils::m_LoadedMods;
+
+std::unordered_map<std::string, std::string>* ModUtils::m_ModVersions;
 
 JavaVM* ModUtils::m_Jvm;
 
@@ -151,6 +154,13 @@ std::string ModUtils::GetFileName(std::string name) {
 	else libName = GetLibName(name);
 
 	return GetFileNameFromDir(libName);
+}
+
+std::string ModUtils::GetModVersion(std::string name) {
+	std::string fileName = GetFileName(name);
+	if (m_ModVersions->find(fileName) == m_ModVersions->end()) return "Unknown";
+
+	return m_ModVersions->at(fileName);
 }
 
 std::list<std::string> ModUtils::GetLoadedModsFileNames() {
@@ -291,6 +301,12 @@ void ModUtils::CollectLoadedMods() {
 	}
 }
 
+void ModUtils::CollectModVersions() {
+	for (std::pair<std::string, const Mod> modPair : Modloader::getMods()) {
+		m_ModVersions->emplace(modPair.second.name, modPair.second.info.version);
+	}
+}
+
 void ModUtils::CollectOddLibs() {
 	m_OddLibNames->clear();
 	std::list<std::string> modFileNames = GetDirContents(m_ModPath);
@@ -330,13 +346,17 @@ std::string ModUtils::GetFileNameFromModID(std::string modID) {
 }
 
 void ModUtils::Init() {
+	m_CoreMods = HiddenModConfigUtils::GetCoreMods();
 	m_OddLibNames = new std::list<std::string>();
 	m_LoadedMods = new std::list<std::string>();
+	m_ModVersions = new std::unordered_map<std::string, std::string>();
+
 	m_ModPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
 	m_LibPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/libs/";
-	m_CoreMods = HiddenModConfigUtils::GetCoreMods();
 	
+	CollectCoreMods();
 	CollectLoadedMods();
+	CollectModVersions();
 	CollectOddLibs();
 }
 

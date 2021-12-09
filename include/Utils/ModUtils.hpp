@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <optional>
 #include <jni.h>
+#include <unordered_map>
 
 class ModUtils {
 public:
@@ -154,6 +155,14 @@ public:
     static std::string GetFileName(std::string name);
 
 	/**
+	 * @brief Gets the Version of a loaded mod
+	 * 
+	 * @param name The mod to get the version of
+	 * @return The mod's version. Returns "Unknown" if failed to get the mod version
+	 */
+    static std::string GetModVersion(std::string name);
+
+	/**
 	 * @brief Get a list of all the loaded mods
 	 * 
 	 * @return Returns a list of loaded mod file names
@@ -229,8 +238,11 @@ private:
 	static std::list<std::string>* m_CoreMods;
 	static std::list<std::string>* m_LoadedMods;
 
+	static std::unordered_map<std::string, std::string>* m_ModVersions;
+
 	static void CollectCoreMods();
 	static void CollectLoadedMods();
+	static void CollectModVersions();
 	static void CollectOddLibs();
 
 	static std::string GetFileNameFromDir(std::string libName);

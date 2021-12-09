@@ -11,6 +11,7 @@ DECLARE_CONFIG(MainConfig,
     CONFIG_VALUE(ShowHoverHints, bool, "ShowHoverHints", true);
     CONFIG_VALUE(ShowFileNameOnHoverHint, bool, "ShowFileNameOnHoverHint", true);
     CONFIG_VALUE(ShowModIDOnHoverHint, bool, "ShowModIDOnHoverHint", true);
+    CONFIG_VALUE(ShowModVersionOnHoverHint, bool, "ShowModVersionOnHoverHint", true);
     CONFIG_VALUE(ShowModTypeOnHoverHint, bool, "ShowModTypeOnHoverHint", true);
     CONFIG_VALUE(ShowModErrorsOnHoverHint, bool, "ShowModErrorsOnHoverHint", true);
 
@@ -25,6 +26,7 @@ DECLARE_CONFIG(MainConfig,
         CONFIG_INIT_VALUE(ShowHoverHints);
         CONFIG_INIT_VALUE(ShowFileNameOnHoverHint);
         CONFIG_INIT_VALUE(ShowModIDOnHoverHint);
+        CONFIG_INIT_VALUE(ShowModVersionOnHoverHint);
         CONFIG_INIT_VALUE(ShowModTypeOnHoverHint);
         CONFIG_INIT_VALUE(ShowModErrorsOnHoverHint);
 

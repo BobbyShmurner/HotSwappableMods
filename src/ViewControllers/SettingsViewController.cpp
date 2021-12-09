@@ -144,6 +144,12 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 	hoverHintSettings->emplace_front(showModIDOnHoverHint->get_transform()->get_parent()->get_gameObject());
 	QuestUI::BeatSaberUI::AddHoverHint(showModIDOnHoverHint->get_gameObject(), "When enabled, a mod's Mod ID will be displayed on its hover hint");
 
+	UnityEngine::UI::Toggle* showModVersionOnHoverHint = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Mod Versions On Hover Hints", getMainConfig().ShowModVersionOnHoverHint.GetValue(), [](bool value){
+		getMainConfig().ShowModVersionOnHoverHint.SetValue(value);
+	});
+	hoverHintSettings->emplace_front(showModVersionOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	QuestUI::BeatSaberUI::AddHoverHint(showModVersionOnHoverHint->get_gameObject(), "When enabled, a mod's version will be displayed on its hover hint");
+
 	UnityEngine::UI::Toggle* showModTypeOnHoverHint = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Mod Types On Hover Hints", getMainConfig().ShowModTypeOnHoverHint.GetValue(), [](bool value){
 		getMainConfig().ShowModTypeOnHoverHint.SetValue(value);
 	});

@@ -113,7 +113,10 @@ void GenerateModHoverHint(UnityEngine::GameObject* toggle, UnityEngine::GameObje
 
 	if (!ModUtils::IsDisabled(fileName)) {
 		if (ModUtils::IsModLoaded(fileName)) {
-			if (!isLibrary && getMainConfig().ShowModIDOnHoverHint.GetValue()) hoverMessage += string_format("%sMod ID - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModID(fileName).c_str());
+			if (!isLibrary) {
+				if (getMainConfig().ShowModIDOnHoverHint.GetValue()) 		hoverMessage += string_format("%sMod ID - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModID(fileName).c_str());
+				if (getMainConfig().ShowModVersionOnHoverHint.GetValue()) 	hoverMessage += string_format("%sMod Version - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModVersion(fileName).c_str());
+			}
 		}
 		else if (getMainConfig().ShowModErrorsOnHoverHint.GetValue()) hoverMessage += string_format("%sFailed To Load! Reason - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModError(fileName)->c_str());
 	}
