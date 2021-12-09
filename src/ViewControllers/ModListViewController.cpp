@@ -108,19 +108,19 @@ void GenerateModHoverHint(UnityEngine::GameObject* toggle, UnityEngine::GameObje
 	hoverMessage += string_format("File Name - %s", fileName.c_str());
 
 	bool isCore = ModUtils::IsCoreMod(fileName);
-	bool isLibary = ModUtils::IsModALibary(fileName);
+	bool isLibrary = ModUtils::IsModALibrary(fileName);
 
 	if (!ModUtils::IsDisabled(fileName)) {
 		if (ModUtils::IsModLoaded(fileName)) {
-			if (!isLibary) hoverMessage += string_format("\nMod ID - %s", ModUtils::GetModID(fileName).c_str());
+			if (!isLibrary) hoverMessage += string_format("\nMod ID - %s", ModUtils::GetModID(fileName).c_str());
 		}
 		else hoverMessage += string_format("\nFailed To Load! Reason - %s", ModUtils::GetModError(fileName)->c_str());
 	}
 
-	if (isCore && !isLibary)	hoverMessage += string_format("\nMod Type - Core Mod");
-	if (!isCore && isLibary)	hoverMessage += string_format("\nMod Type - Libary");
-	if (isCore && isLibary)		hoverMessage += string_format("\nMod Type - Core Mod, Libary");
-	if (!isCore && !isLibary)	hoverMessage += string_format("\nMod Type - Mod");
+	if (isCore && !isLibrary)	hoverMessage += string_format("\nMod Type - Core Mod");
+	if (!isCore && isLibrary)	hoverMessage += string_format("\nMod Type - Library");
+	if (isCore && isLibrary)		hoverMessage += string_format("\nMod Type - Core Mod, Library");
+	if (!isCore && !isLibrary)	hoverMessage += string_format("\nMod Type - Mod");
 
 	QuestUI::BeatSaberUI::AddHoverHint(toggle, std::string_view(hoverMessage));
 }
@@ -174,7 +174,7 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std
 		} else {
 			if (areCoreMods) continue;
 
-			if (ModUtils::IsModALibary(toggleName)){
+			if (ModUtils::IsModALibrary(toggleName)){
 				if (!areLibs) continue;
 			} else {
 				if (areLibs) continue;
@@ -209,18 +209,18 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 	std::list<std::string> coreModsDisabled = std::list<std::string>();
 
 	for (std::string mod : *modsToToggle) {
-		if ((ModUtils::IsCoreMod(mod) || ModUtils::IsModALibary(mod)) && modsEnabled->at(mod)) {
+		if ((ModUtils::IsCoreMod(mod) || ModUtils::IsModALibrary(mod)) && modsEnabled->at(mod)) {
 			coreModsDisabled.emplace_front(mod);
 		}
 	}
 
 	if (coreModsDisabled.size() == 0) return false;
 
-	HMUI::ModalView* modal = QuestUI::BeatSaberUI::CreateModal(trans, {80, 60}, nullptr, true);
+	HMUI::ModalView* modal = QuestUI::BeatSaberUI::CreateModal(trans, {80, 75}, nullptr, true);
 	
 	UnityEngine::UI::VerticalLayoutGroup* modalLayout = QuestUI::BeatSaberUI::CreateVerticalLayoutGroup(modal->get_transform());
 
-	modalLayout->get_rectTransform()->set_anchorMin({0, 0.2f});
+	modalLayout->get_rectTransform()->set_anchorMin({0, 0.1f});
 	modalLayout->get_rectTransform()->set_anchorMax({1, 1});
 
 	modalLayout->set_padding(UnityEngine::RectOffset::New_ctor(2, 2, 2, 2));
@@ -236,7 +236,7 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 	modalWarnText->set_color({1, 0, 0, 1});
 	modalWarnText->set_fontSize(8);
 
-	QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Are you sure you wanna dissable to following core mods?\n"}, false)->set_alignment(TMPro::TextAlignmentOptions::Center);
+	QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Are you sure you wanna dissable to following mods?\n"}, false)->set_alignment(TMPro::TextAlignmentOptions::Center);
 
 	for (std::string mod : coreModsDisabled) {
 		TMPro::TextMeshProUGUI* modText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), std::string_view("- " + GetDisplayName(mod)), false);

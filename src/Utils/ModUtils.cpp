@@ -36,7 +36,7 @@ void ModUtils::SetModActive(std::string name, bool active) {
 	getLogger().info("%s mod \"%s\"", active ? "Enabling" : "Disabling", GetLibName(name).c_str());
 
 	std::string path;
-	if (IsModALibary(name)) path = m_LibPath;
+	if (IsModALibrary(name)) path = m_LibPath;
 	else path = m_ModPath;
 
 	std::list<std::string> fileNames = GetDirContents(path);
@@ -90,7 +90,7 @@ bool ModUtils::IsCoreMod(std::string name) {
 	return (std::find(m_CoreMods->begin(), m_CoreMods->end(), GetLibName(name)) != m_CoreMods->end());
 }
 
-bool ModUtils::IsModALibary(std::string name) {
+bool ModUtils::IsModALibrary(std::string name) {
 	std::string fileName = GetFileName(name);
 	std::list<std::string> libFiles = GetDirContents(m_LibPath);
 
