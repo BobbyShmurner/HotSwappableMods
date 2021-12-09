@@ -9,14 +9,15 @@
 Logger& getLogger();
 
 const char* ModUtils::m_ModPath;
+const char* ModUtils::m_LibPath;
 std::list<std::string>* ModUtils::m_OddLibNames;
 std::list<std::string>* ModUtils::m_CoreMods;
 std::list<std::string>* ModUtils::m_LoadedMods;
 
 JavaVM* ModUtils::m_Jvm;
 
-std::list<std::string> ModUtils::GetDirContents(const char* dirPath) {
-	DIR* dir = opendir(dirPath);
+std::list<std::string> ModUtils::GetDirContents(std::string dirPath) {
+	DIR* dir = opendir(dirPath.c_str());
 	dirent* dp;
 	std::list<std::string> files; 
 
@@ -33,14 +34,21 @@ std::list<std::string> ModUtils::GetDirContents(const char* dirPath) {
 
 void ModUtils::SetModActive(std::string name, bool active) {
 	getLogger().info("%s mod \"%s\"", active ? "Enabling" : "Disabling", GetLibName(name).c_str());
-	std::list<std::string> modFileNames = GetDirContents(m_ModPath);
 
-	for (std::string modFileName : modFileNames) {
-		if (!IsFileName(modFileName)) continue;
-		if (strcmp(modFileName.c_str(), GetFileName(name).c_str())) continue;
+	std::string path;
+	if (IsLibOrMod(name)) path = m_LibPath;
+	else path = m_ModPath;
 
-		if (active) rename(string_format("%s/%s", m_ModPath, modFileName.c_str()).c_str(), string_format("%s/%s.so", m_ModPath, GetLibName(name).c_str()).c_str());
-		else rename(string_format("%s/%s", m_ModPath, modFileName.c_str()).c_str(), string_format("%s/%s.disabled", m_ModPath, GetLibName(name).c_str()).c_str());
+	std::list<std::string> fileNames = GetDirContents(path);
+
+	for (std::string fileName : fileNames) {
+		if (!IsFileName(fileName)) continue;
+		if (strcmp(fileName.c_str(), GetFileName(name).c_str())) continue;
+
+		if (active) rename(string_format("%s/%s", path.c_str(), fileName.c_str()).c_str(), string_format("%s/%s.so", path.c_str(), GetLibName(name).c_str()).c_str());
+		else rename(string_format("%s/%s", path.c_str(), fileName.c_str()).c_str(), string_format("%s/%s.disabled", path.c_str(), GetLibName(name).c_str()).c_str());
+
+		return;
 	}
 }
 
@@ -75,11 +83,18 @@ bool ModUtils::IsOddLibName(std::string name) {
 }
 
 bool ModUtils::IsModLoaded(std::string name) {
-	return (std::find(m_LoadedMods->begin(), m_LoadedMods->end(), GetFileName(name)) != m_LoadedMods->end());
+	return (std::find(m_LoadedMods->begin(), m_LoadedMods->end(), GetFileName(name)) != m_LoadedMods->end());;
 }
 
 bool ModUtils::IsCoreMod(std::string name) {
 	return (std::find(m_CoreMods->begin(), m_CoreMods->end(), GetLibName(name)) != m_CoreMods->end());
+}
+
+bool ModUtils::IsLibOrMod(std::string name) {
+	std::string fileName = GetFileName(name);
+	std::list<std::string> libFiles = GetDirContents(m_LibPath);
+
+	return (std::find(libFiles.begin(), libFiles.end(), fileName) != libFiles.end());
 }
 
 // Mod Name = Mod Name
@@ -161,6 +176,14 @@ std::optional<std::string> ModUtils::GetModError(std::string name) {
 	return error ? std::optional(std::string(error).substr(15)) : std::nullopt;
 }
 
+std::string ModUtils::GetModsFolder() {
+	return m_ModPath;
+}
+
+std::string ModUtils::GetLibsFolder() {
+	return m_LibPath;
+}
+
 JNIEnv* ModUtils::GetJNIEnv() {
 	JNIEnv* env;
 
@@ -233,29 +256,42 @@ void ModUtils::CollectLoadedMods() {
 	for (std::pair<std::string, const Mod> modPair : Modloader::getMods()) {
 		m_LoadedMods->emplace_front(modPair.second.name);
 	}
+
+	// As Modloader only keeps track of loaded mods, not libs, we have to collect the ourself
+	for (std::string fileName : GetDirContents(m_LibPath)) {
+		if (GetModError(fileName) == std::nullopt) m_LoadedMods->emplace_front(fileName);
+	}
 }
 
 void ModUtils::CollectOddLibs() {
 	m_OddLibNames->clear();
 	std::list<std::string> modFileNames = GetDirContents(m_ModPath);
+	std::list<std::string> libFileNames = GetDirContents(m_LibPath);
 
-	for (std::string modFileName : modFileNames) {
-		if (!IsFileName(modFileName)) continue;
+	std::list<std::string> fileNames = modFileNames;
+	fileNames.merge(libFileNames);
 
-		if (strcmp(modFileName.substr(0, 3).c_str(), "lib")) {
-			getLogger().info("Mod \"%s\" does not start with \"lib\"! Adding to m_OddLibNames", modFileName.c_str());
+	for (std::string fileName : fileNames) {
+		if (!IsFileName(fileName)) continue;
 
-			if (IsDisabled(modFileName)) m_OddLibNames->emplace_front(modFileName.substr(0, modFileName.size() - 9));
-			else m_OddLibNames->emplace_front(modFileName.substr(0, modFileName.size() - 3));
+		if (strcmp(fileName.substr(0, 3).c_str(), "lib")) {
+			getLogger().info("Mod \"%s\" does not start with \"lib\"! Adding to m_OddLibNames", fileName.c_str());
+
+			if (IsDisabled(fileName)) m_OddLibNames->emplace_front(fileName.substr(0, fileName.size() - 9));
+			else m_OddLibNames->emplace_front(fileName.substr(0, fileName.size() - 3));
 		}
 	}
 }
 
 std::string ModUtils::GetFileNameFromDir(std::string libName) {
 	std::list<std::string> modFileNames = GetDirContents(m_ModPath);
+	std::list<std::string> libFileNames = GetDirContents(m_LibPath);
 
-	for (std::string modFileName : modFileNames) {
-		if (!strcmp(GetLibName(modFileName).c_str(), libName.c_str())) return modFileName;
+	std::list<std::string> fileNames = modFileNames;
+	fileNames.merge(libFileNames);
+
+	for (std::string fileName : fileNames) {
+		if (!strcmp(GetLibName(fileName).c_str(), libName.c_str())) return fileName;
 	}
 
 	return {"Null"};
@@ -269,9 +305,11 @@ void ModUtils::Init() {
 	m_OddLibNames = new std::list<std::string>();
 	m_LoadedMods = new std::list<std::string>();
 	m_ModPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
+	m_LibPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/libs/";
 	m_CoreMods = HiddenModConfigUtils::GetCoreMods();
 	
 	CollectLoadedMods();
+	CollectOddLibs();
 }
 
 void __attribute__((constructor)) ModUtils::OnDlopen() {

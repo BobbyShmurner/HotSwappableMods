@@ -16,7 +16,7 @@ public:
 	 * @param dirPath The Path to get the contents of
 	 * @return A list of all the files in the directory
 	 */
-	static std::list<std::string> GetDirContents(const char* dirPath);
+	static std::list<std::string> GetDirContents(std::string dirPath);
 
 	/**
 	 * @brief Sets the activity of a specific mod
@@ -82,6 +82,15 @@ public:
 	 * @return Returns true if the mod is a core mod
 	 */
 	static bool IsCoreMod(std::string name);
+
+	/**
+	 * @brief Checks if a mod is a "Lib" file or a "Mod" file
+	 * @details A mod is considered a "Lib" file if its found in the lib folder, and vice versa
+	 * 
+	 * @param name The mod to check
+	 * @return Returns true if the mod is a "Lib" File. Returns false if the mod is a "Mod" File
+	 */
+	static bool IsLibOrMod(std::string name);
 
     // Mod Id = Mod Name
     // Lib Name = libmodname
@@ -174,6 +183,20 @@ public:
 	static std::optional<std::string> GetModError(std::string name);
 
 	/**
+	 * @brief Gets the location of the Mods folder
+	 * 
+	 * @return The location of the Mods folder
+	 */
+    static std::string GetModsFolder();
+
+	/**
+	 * @brief Gets the location of the Libs folder
+	 * 
+	 * @return The location of the Libs folder
+	 */
+    static std::string GetLibsFolder();
+
+	/**
 	 * @brief Returns a working pointer to a JNI Environment. Use this over Modloader::getJni()
 	 * @details When using Modloader's getJni function, the JNIEnv* that it returns doesnt work on the Unity thread, as JNIEnvs are thread specific.
 	 * @details This function will return a JNIEnv* thar works on the UnityMain Thread
@@ -190,6 +213,7 @@ public:
 	static void Init();
 private:
 	static const char* m_ModPath;
+	static const char* m_LibPath;
 	static JavaVM* m_Jvm;
 
 	static std::list<std::string>* m_OddLibNames;

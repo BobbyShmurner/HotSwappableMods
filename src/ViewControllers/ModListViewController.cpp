@@ -113,8 +113,6 @@ void GenerateModHoverHint(UnityEngine::GameObject* toggle, UnityEngine::GameObje
 	QuestUI::BeatSaberUI::AddHoverHint(text, std::string_view(hoverMessage));
 
 	text->AddComponent<UnityEngine::UI::LayoutElement*>();
-
-	BobbyUtils::LogComponents(text);
 }
 
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isHiddenMod) {
@@ -150,7 +148,7 @@ void ClearModToggles() {
 }
 
 int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool isHiddenMods) {
-	std::list<std::string> modsToHide = ModUtils::GetCoreMods();
+	std::list<std::string> coreMods = ModUtils::GetCoreMods();
 	std::list<std::string> noNoMods = HiddenModConfigUtils::GetNoNoModsList();
 
 	int togglesCreated = 0;
@@ -161,7 +159,7 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std
 		std::string toggleName = GetDisplayName(mod.first);
 		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName); // GetModID will return the file name is the mod isnt loaded, so just remove the file extension by getting the lib
 
-		if (std::find(modsToHide.begin(), modsToHide.end(), ModUtils::GetLibName(mod.first)) != modsToHide.end()){
+		if (std::find(coreMods.begin(), coreMods.end(), ModUtils::GetLibName(mod.first)) != coreMods.end()){
 			if (!isHiddenMods) continue;
 		} else {
 			if (isHiddenMods) continue;
@@ -177,7 +175,13 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std
 void PopulateModsEnabledMap() {
 	modsEnabled->clear();
 
-	for (std::string fileName : ModUtils::GetDirContents("/sdcard/Android/data/com.beatgames.beatsaber/files/mods/")) {
+	std::list<std::string> modsFolder = ModUtils::GetDirContents(ModUtils::GetModsFolder());
+	std::list<std::string> libsFolder = ModUtils::GetDirContents(ModUtils::GetLibsFolder());
+
+	std::list<std::string> files = modsFolder;
+	files.merge(libsFolder);
+
+	for (std::string fileName : files) {
 		if (!ModUtils::IsFileName(fileName)) continue;
 
 		if (ModUtils::IsDisabled(fileName)) modsEnabled->emplace(fileName, false);
