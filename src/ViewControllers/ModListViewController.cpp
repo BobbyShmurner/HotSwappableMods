@@ -103,26 +103,29 @@ UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool 
 }
 
 void GenerateModHoverHint(UnityEngine::GameObject* toggle, UnityEngine::GameObject* text, std::string fileName) {
+	if (!getMainConfig().ShowHoverHints.GetValue()) return;
 	std::string hoverMessage = "";
 
-	hoverMessage += string_format("File Name - %s", fileName.c_str());
+	if (getMainConfig().ShowFileNameOnHoverHint.GetValue()) hoverMessage += string_format("File Name - %s", fileName.c_str());
 
 	bool isCore = ModUtils::IsCoreMod(fileName);
 	bool isLibrary = ModUtils::IsModALibrary(fileName);
 
 	if (!ModUtils::IsDisabled(fileName)) {
 		if (ModUtils::IsModLoaded(fileName)) {
-			if (!isLibrary) hoverMessage += string_format("\nMod ID - %s", ModUtils::GetModID(fileName).c_str());
+			if (!isLibrary && getMainConfig().ShowModIDOnHoverHint.GetValue()) hoverMessage += string_format("%sMod ID - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModID(fileName).c_str());
 		}
-		else hoverMessage += string_format("\nFailed To Load! Reason - %s", ModUtils::GetModError(fileName)->c_str());
+		else if (getMainConfig().ShowModErrorsOnHoverHint.GetValue()) hoverMessage += string_format("%sFailed To Load! Reason - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModError(fileName)->c_str());
 	}
 
-	if (isCore && !isLibrary)	hoverMessage += string_format("\nMod Type - Core Mod");
-	if (!isCore && isLibrary)	hoverMessage += string_format("\nMod Type - Library");
-	if (isCore && isLibrary)		hoverMessage += string_format("\nMod Type - Core Mod, Library");
-	if (!isCore && !isLibrary)	hoverMessage += string_format("\nMod Type - Mod");
+	if (getMainConfig().ShowModTypeOnHoverHint.GetValue()) { 
+		if ( isCore && !isLibrary)	hoverMessage += string_format("%sMod Type - Core Mod", hoverMessage == "" ? "" : "\n");
+		if (!isCore &&  isLibrary)	hoverMessage += string_format("%sMod Type - Library", hoverMessage == "" ? "" : "\n");
+		if ( isCore &&  isLibrary)	hoverMessage += string_format("%sMod Type - Core Mod, Library", hoverMessage == "" ? "" : "\n");
+		if (!isCore && !isLibrary)	hoverMessage += string_format("%sMod Type - Mod", hoverMessage == "" ? "" : "\n");
+	}
 
-	QuestUI::BeatSaberUI::AddHoverHint(toggle, std::string_view(hoverMessage));
+	if (hoverMessage != "") QuestUI::BeatSaberUI::AddHoverHint(toggle, std::string_view(hoverMessage));
 }
 
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isImportant) {

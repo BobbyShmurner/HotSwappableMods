@@ -3,7 +3,6 @@
 #include "Utils/ModUtils.hpp"
 #include "Utils/HiddenModConfigUtils.hpp"
 
-#include "DataTypes/PublicMod.hpp"
 #include "DataTypes/MainConfig.hpp"
 
 #include "ViewControllers/ModListViewController.hpp"
