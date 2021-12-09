@@ -84,13 +84,13 @@ public:
 	static bool IsCoreMod(std::string name);
 
 	/**
-	 * @brief Checks if a mod is a "Lib" file or a "Mod" file
-	 * @details A mod is considered a "Lib" file if its found in the lib folder, and vice versa
+	 * @brief Checks if a mod is a "Libary" file or a "Mod" file
+	 * @details A mod is considered a "Libary" file if its found in the lib folder, and vice versa
 	 * 
 	 * @param name The mod to check
-	 * @return Returns true if the mod is a "Lib" File. Returns false if the mod is a "Mod" File
+	 * @return Returns true if the mod is a "Libary" File. Returns false if the mod is a "Mod" File
 	 */
-	static bool IsLibOrMod(std::string name);
+	static bool IsModALibary(std::string name);
 
     // Mod Id = Mod Name
     // Lib Name = libmodname
@@ -127,10 +127,11 @@ public:
     // Name Conversions
 
 	/**
-	 * @brief Gets the Mod ID of a mod
+	 * @brief Gets the Mod ID of a mod.
+	 * NOTE: You cannot get the Mod ID of a libary
 	 * 
 	 * @param name The mod to get the id of
-	 * @return The mod's Mod ID. If the mod isn't loaded the mod's Lib Name will be returned instead
+	 * @return The mod's Mod ID. If the mod isn't loaded or the mod is a lib, the mod's Lib Name will be returned instead
 	 */
 	static std::string GetModID(std::string name);
 
