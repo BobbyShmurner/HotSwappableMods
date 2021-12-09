@@ -5,6 +5,7 @@
 
 #include <dlfcn.h>
 #include <dirent.h>
+#include <stdio.h>
 
 Logger& getLogger();
 
@@ -241,6 +242,33 @@ void ModUtils::RestartBS() {
 
 	CALL_STATIC_JINT_METHOD(env, pid, processClass, "myPid", "()I", jint);
 	CALL_STATIC_VOID_METHOD(env, processClass, killProcess, "(I)V", pid);
+}
+
+bool ModUtils::RemoveDuplicateMods() {
+	std::list<std::string> modFileNames = GetDirContents(m_ModPath);
+	std::list<std::string> libFileNames = GetDirContents(m_LibPath);
+
+	std::list<std::string> fileNames = modFileNames;
+	fileNames.merge(libFileNames);
+
+	bool removedDuplicate = false;
+
+	for (std::string file : fileNames) {
+		if (!IsDisabled(file)) continue;
+
+		std::string enabledName = GetLibName(file) + ".so";
+		if (std::find(fileNames.begin(), fileNames.end(), enabledName) != fileNames.end()) {
+			std::string path = m_ModPath;
+			if (IsModALibrary(file)) path = m_LibPath;
+
+			remove(string_format("%s/%s", path.c_str(), file.c_str()).c_str());
+			getLogger().info("Removed Duplicated File \"%s\"", file.c_str());
+
+			removedDuplicate = true;
+		}
+	}
+
+	return removedDuplicate;
 }
 
 void ModUtils::CacheJVM() {

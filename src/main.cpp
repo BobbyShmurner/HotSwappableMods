@@ -85,4 +85,15 @@ extern "C" void load() {
     QuestUI::Register::RegisterModSettingsViewController<HotSwappableMods::SettingsViewController*>(modInfo);
     QuestUI::Register::RegisterMainMenuModSettingsViewController<HotSwappableMods::ModListViewController*>(modInfo);
     getLogger().info("Setup QuestUI!");
+
+    if (getMainConfig().RemoveDuplicatesAtStartup.GetValue()) {
+        getLogger().info("Checking for duplicate files...");
+
+        if (ModUtils::RemoveDuplicateMods()) {
+            getLogger().info("Duplicate Mods found! Restarting...");
+            ModUtils::RestartBS();
+        } else {
+            getLogger().info("No Duplicate Mods Found");
+        }
+    }
 }

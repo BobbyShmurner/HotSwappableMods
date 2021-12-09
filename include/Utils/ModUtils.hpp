@@ -211,6 +211,14 @@ public:
 	 */
 	static void RestartBS();
 
+	/**
+	 * @brief Removes any .disabled files if a .so version of the file is found
+	 * @details This has a big impact on performance, and will stall if called on the main thread
+	 * 
+	 * @return Returns true if a duplicate mod was found
+	 */
+	static bool RemoveDuplicateMods();
+
 	static void Init();
 private:
 	static const char* m_ModPath;

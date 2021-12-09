@@ -172,6 +172,12 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 	warningDesc->set_alignment(TMPro::TextAlignmentOptions::Center);
 	warningDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
+	UnityEngine::UI::Toggle* removeDuplicatesAtStartup = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Remove Duplicate Files At Startup", getMainConfig().RemoveDuplicatesAtStartup.GetValue(), [](bool value){
+		getMainConfig().RemoveDuplicatesAtStartup.SetValue(value);
+	});
+	advancedSettings->emplace_front(removeDuplicatesAtStartup->get_transform()->get_parent()->get_gameObject());
+	QuestUI::BeatSaberUI::AddHoverHint(removeDuplicatesAtStartup->get_gameObject(), "When this is enabled, any \".disabled\" files will be removed if a \".so\" version is found.\n\nThere is no real reason for this to be turned off, so just leave this on unless you really have to disable it");
+
 	UnityEngine::UI::Toggle* showCoreMods = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Core Mods", getMainConfig().ShowCoreMods.GetValue(), [](bool value){
 		getMainConfig().ShowCoreMods.SetValue(value);
 	});
