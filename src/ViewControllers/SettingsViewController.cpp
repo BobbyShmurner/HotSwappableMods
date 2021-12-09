@@ -117,9 +117,10 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 	titleText->set_fontSize(10.0f);
 	titleText->set_alignment(TMPro::TextAlignmentOptions::Center);
 
-	QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Always show file names", getMainConfig().AlwaysShowFileNames.GetValue(), [](bool value){
+	UnityEngine::UI::Toggle* alwaysShowFileNames = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Always show file names", getMainConfig().AlwaysShowFileNames.GetValue(), [](bool value){
 		getMainConfig().AlwaysShowFileNames.SetValue(value);
 	});
+	QuestUI::BeatSaberUI::AddHoverHint(alwaysShowFileNames->get_gameObject(), "When enabled, File names will always be displayed, instead of Mod IDs");
 
 	// Hover Hint Settings
 
@@ -129,35 +130,41 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 		UpdateHoverHintSettings(value);
 		getMainConfig().ShowHoverHints.SetValue(value);
 	});
+	QuestUI::BeatSaberUI::AddHoverHint(showHoverHints->get_gameObject(), "When enabled, Hover Hints like these will be displayed when hovering over mod toggles");
 
 	UnityEngine::UI::Toggle* showFileNameOnHoverHint = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show File Names On Hover Hints", getMainConfig().ShowFileNameOnHoverHint.GetValue(), [](bool value){
 		getMainConfig().ShowFileNameOnHoverHint.SetValue(value);
 	});
 	hoverHintSettings->emplace_front(showFileNameOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	QuestUI::BeatSaberUI::AddHoverHint(showFileNameOnHoverHint->get_gameObject(), "When enabled, a mod's File Name will be displayed on its hover hint");
 
 	UnityEngine::UI::Toggle* showModIDOnHoverHint = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Mod IDs On Hover Hints", getMainConfig().ShowModIDOnHoverHint.GetValue(), [](bool value){
 		getMainConfig().ShowModIDOnHoverHint.SetValue(value);
 	});
 	hoverHintSettings->emplace_front(showModIDOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	QuestUI::BeatSaberUI::AddHoverHint(showModIDOnHoverHint->get_gameObject(), "When enabled, a mod's Mod ID will be displayed on its hover hint");
 
 	UnityEngine::UI::Toggle* showModTypeOnHoverHint = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Mod Types On Hover Hints", getMainConfig().ShowModTypeOnHoverHint.GetValue(), [](bool value){
 		getMainConfig().ShowModTypeOnHoverHint.SetValue(value);
 	});
 	hoverHintSettings->emplace_front(showModTypeOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	QuestUI::BeatSaberUI::AddHoverHint(showModTypeOnHoverHint->get_gameObject(), "When enabled, a mod's type will be displayed on its hover hint.\nThe 3 mod types are \"Core\", \"Library\" and \"Mod\"");
 
 	UnityEngine::UI::Toggle* showModErrorsOnHoverHint = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Mod Errors On Hover Hints", getMainConfig().ShowModErrorsOnHoverHint.GetValue(), [](bool value){
 		getMainConfig().ShowModErrorsOnHoverHint.SetValue(value);
 	});
 	hoverHintSettings->emplace_front(showModErrorsOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	QuestUI::BeatSaberUI::AddHoverHint(showModErrorsOnHoverHint->get_gameObject(), "When enabled, an error will be displayed on the hover hints of mods that failed to load that explains why the mod failed to load");
 
 	// Advanced Settings
 
 	CreateSeperator(mainContainer->get_transform());
 
-	QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Advanced Settings", getMainConfig().ShowAdvancedSettings.GetValue(), [&](bool value){
+	UnityEngine::UI::Toggle* showAdvancedSettings = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Advanced Settings", getMainConfig().ShowAdvancedSettings.GetValue(), [&](bool value){
 		UpdateAdvandcedSettings(value);
 		getMainConfig().ShowAdvancedSettings.SetValue(value);
 	});
+	QuestUI::BeatSaberUI::AddHoverHint(showAdvancedSettings->get_gameObject(), "When enabled, advandced settings will be displayed.\n\nMessing with these settings when you don't know what you are doing can very easily break your game, so it's better to just leave this off");
 
 	TMPro::TextMeshProUGUI* warningTitle = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "WARNING!", false);
 	advancedSettings->emplace_front(warningTitle->get_gameObject());
@@ -182,12 +189,14 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 		getMainConfig().ShowCoreMods.SetValue(value);
 	});
 	advancedSettings->emplace_front(showCoreMods->get_transform()->get_parent()->get_gameObject());
+	QuestUI::BeatSaberUI::AddHoverHint(showCoreMods->get_gameObject(), "When enabled, Core mods will be shown.\n\nDONT DO THIS UNLESS YOU KNOW WHAT YOU ARE DOING!");
 
 
 	UnityEngine::UI::Toggle* showLibs = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Libraries", getMainConfig().ShowLibs.GetValue(), [](bool value){
 		getMainConfig().ShowLibs.SetValue(value);
 	});
 	advancedSettings->emplace_front(showLibs->get_transform()->get_parent()->get_gameObject());
+	QuestUI::BeatSaberUI::AddHoverHint(showLibs->get_gameObject(), "When enabled, Library mods will be shown.\n\nDisabling Library mods will almost 100% break something, so dont do it!");
 
 	// Update Toggles on first activation
 
