@@ -119,7 +119,14 @@ bool ModUtils::IsModALibrary(std::string name) {
 // Name Tests
 
 bool ModUtils::IsModID(std::string name) {
-	return !IsLibName(name) && !IsFileName(name);
+	std::string fileName = GetFileName(name);
+	std::unordered_map<std::string, const Mod> mods = Modloader::getMods();
+
+	for (std::pair<std::string, const Mod> modPair : mods) {
+		if (!strcmp(fileName.c_str(), modPair.second.name.c_str())) return true;
+	}
+
+	return false;
 }
 
 bool ModUtils::IsLibName(std::string name) {
