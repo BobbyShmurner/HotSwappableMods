@@ -170,9 +170,9 @@ public:
 	static std::list<std::string> GetLoadedModsFileNames();
 
 	/**
-	 * @brief Get a list of all the loaded core mods
+	 * @brief Get a list of all the core mods for this version
 	 * 
-	 * @return Returns a list of the lib names for the loaded core mods
+	 * @return Returns a list of Mod IDs for all the core mods
 	 */
 	static std::list<std::string> GetCoreMods();
 
@@ -207,6 +207,13 @@ public:
     static std::string GetLibsFolder();
 
 	/**
+	 * @brief Get the version of Beat Saber that's currently running
+	 * 
+	 * @return A string that contains the game version
+	 */
+	static std::string GetGameVersion();
+
+	/**
 	 * @brief Returns a working pointer to a JNI Environment. Use this over Modloader::getJni()
 	 * @details When using Modloader's getJni function, the JNIEnv* that it returns doesnt work on the Unity thread, as JNIEnvs are thread specific.
 	 * @details This function will return a JNIEnv* thar works on the UnityMain Thread
@@ -232,6 +239,8 @@ public:
 private:
 	static const char* m_ModPath;
 	static const char* m_LibPath;
+	static const char* m_GameVersion;
+	
 	static JavaVM* m_Jvm;
 
 	static std::list<std::string>* m_OddLibNames;
@@ -245,7 +254,7 @@ private:
 	static void CollectModVersions();
 	static void CollectOddLibs();
 
-	static std::string GetFileNameFromDir(std::string libName);
+	static std::string GetFileNameFromDir(std::string libName, bool guessLibName = false);
 	static std::string GetFileNameFromModID(std::string modID);
 
 	static void CacheJVM();

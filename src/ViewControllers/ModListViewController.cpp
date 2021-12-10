@@ -164,7 +164,6 @@ void ClearModToggles() {
 }
 
 int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool areCoreMods = false, bool areLibs = false) {
-	std::list<std::string> coreMods = ModUtils::GetCoreMods();
 	std::list<std::string> noNoMods = HiddenModConfigUtils::GetNoNoModsList();
 
 	int togglesCreated = 0;

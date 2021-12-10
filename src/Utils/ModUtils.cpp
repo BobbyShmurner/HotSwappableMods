@@ -1,16 +1,25 @@
 #include "Utils/ModUtils.hpp"
 #include "Utils/JNIUtils.hpp"
-
 #include "Utils/HiddenModConfigUtils.hpp"
+
+#include "UnityEngine/Application.hpp"
+
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/document.h"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/writer.h"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/stringbuffer.h"
+#include "beatsaber-hook/shared/rapidjson/include/rapidjson/filewritestream.h"
 
 #include <dlfcn.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <sstream>
+#include <fstream>
 
 Logger& getLogger();
 
 const char* ModUtils::m_ModPath;
 const char* ModUtils::m_LibPath;
+const char* ModUtils::m_GameVersion;
 
 std::list<std::string>* ModUtils::m_OddLibNames;
 std::list<std::string>* ModUtils::m_CoreMods;
@@ -91,7 +100,7 @@ bool ModUtils::IsModLoaded(std::string name) {
 }
 
 bool ModUtils::IsCoreMod(std::string name) {
-	return (std::find(m_CoreMods->begin(), m_CoreMods->end(), GetLibName(name)) != m_CoreMods->end());
+	return (std::find(m_CoreMods->begin(), m_CoreMods->end(), GetFileName(name)) != m_CoreMods->end());
 }
 
 bool ModUtils::IsModALibrary(std::string name) {
@@ -141,6 +150,9 @@ std::string ModUtils::GetLibName(std::string name) {
 
 	if (IsFileName(name)) fileName = name;
 	else fileName = GetFileNameFromModID(name);
+
+	if (fileName == "Null") fileName = GetFileNameFromDir(name);
+	if (fileName == "Null") return "Null";
 
 	if (IsDisabled(fileName)) return fileName.substr(0, fileName.size() - 9);
 	else return fileName.substr(0, fileName.size() - 3);
@@ -193,6 +205,10 @@ std::string ModUtils::GetModsFolder() {
 
 std::string ModUtils::GetLibsFolder() {
 	return m_LibPath;
+}
+
+std::string ModUtils::GetGameVersion() {
+	return m_GameVersion;
 }
 
 JNIEnv* ModUtils::GetJNIEnv() {
@@ -287,7 +303,32 @@ void ModUtils::CacheJVM() {
 }
 
 void ModUtils::CollectCoreMods() {
-	// TODO: Get Core Mods From BMBF, and phase out HiddenModConfigUtils
+	std::ifstream coreModsFile("/sdcard/BMBFData/core-mods.json");
+	std::stringstream coreModsSS;
+	coreModsSS << coreModsFile.rdbuf();
+
+	rapidjson::Document coreModsDoc;
+	coreModsDoc.Parse(coreModsSS.str());
+
+	getLogger().info("Collecting Core Mods...");
+
+	if (coreModsDoc.HasMember(m_GameVersion)) {
+		const rapidjson::Value& versionInfo = coreModsDoc[m_GameVersion];
+		const rapidjson::Value& coreModsList = versionInfo["mods"];
+
+		for (rapidjson::SizeType i = 0; i < coreModsList.Size(); i++) { // rapidjson uses SizeType instead of size_t.
+			const rapidjson::Value& coreModInfo = coreModsList[i];
+
+			std::string fileName = GetFileName(coreModInfo["id"].GetString());
+
+			m_CoreMods->emplace_front(fileName);
+			getLogger().info("Found Core mod %s", fileName.c_str());
+		}
+	} else {
+		getLogger().info("ERROR! No Core Mods Found For This Version!");
+	}
+
+	getLogger().info("Finished Collecting Core Mods!");
 }
 
 void ModUtils::CollectLoadedMods() {
@@ -327,37 +368,48 @@ void ModUtils::CollectOddLibs() {
 	}
 }
 
-std::string ModUtils::GetFileNameFromDir(std::string libName) {
+std::string ModUtils::GetFileNameFromDir(std::string libName, bool guessLibName) {
 	std::list<std::string> modFileNames = GetDirContents(m_ModPath);
 	std::list<std::string> libFileNames = GetDirContents(m_LibPath);
 
 	std::list<std::string> fileNames = modFileNames;
 	fileNames.merge(libFileNames);
 
+	if (guessLibName) libName = "lib" + libName;
+		
 	for (std::string fileName : fileNames) {
 		if (!strcmp(GetLibName(fileName).c_str(), libName.c_str())) return fileName;
 	}
 
+	if (!guessLibName) {
+		return GetFileNameFromDir(libName, true); // Just try gussing it xD
+	}
+
+	getLogger().info("Failed to get file name for \"%s\"!", libName.c_str());
 	return {"Null"};
 }
 
 std::string ModUtils::GetFileNameFromModID(std::string modID) {
+	if (!Modloader::getMods().contains(modID)) return {"Null"};
+
 	return Modloader::getMods().at(modID).name;
 }
 
 void ModUtils::Init() {
-	m_CoreMods = HiddenModConfigUtils::GetCoreMods();
+	m_CoreMods = new std::list<std::string>();
 	m_OddLibNames = new std::list<std::string>();
 	m_LoadedMods = new std::list<std::string>();
 	m_ModVersions = new std::unordered_map<std::string, std::string>();
 
 	m_ModPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/mods/";
 	m_LibPath = "/sdcard/Android/data/com.beatgames.beatsaber/files/libs/";
+
+	m_GameVersion = to_utf8(csstrtostr(UnityEngine::Application::get_version())).c_str();
 	
-	CollectCoreMods();
 	CollectLoadedMods();
 	CollectModVersions();
 	CollectOddLibs();
+	CollectCoreMods();
 }
 
 void __attribute__((constructor)) ModUtils::OnDlopen() {
