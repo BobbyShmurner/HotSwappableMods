@@ -2,7 +2,6 @@
 
 #include "Utils/BobbyUtils.hpp"
 #include "Utils/ModUtils.hpp"
-#include "Utils/HiddenModConfigUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -51,6 +50,7 @@ using namespace TMPro;
 using namespace Polyglot;
 
 extern ModInfo modInfo;
+extern std::list<std::string> NoNoMods;
 
 DEFINE_TYPE(HotSwappableMods, ModListViewController);
 
@@ -164,12 +164,10 @@ void ClearModToggles() {
 }
 
 int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std::string, bool>* mods, bool areCoreMods = false, bool areLibs = false) {
-	std::list<std::string> noNoMods = HiddenModConfigUtils::GetNoNoModsList();
-
 	int togglesCreated = 0;
 
 	for (std::pair<std::string, bool> mod : *mods) {
-		if (std::find(noNoMods.begin(), noNoMods.end(), ModUtils::GetLibName(mod.first)) != noNoMods.end()) continue;
+		if (std::find(NoNoMods.begin(), NoNoMods.end(), ModUtils::GetLibName(mod.first)) != NoNoMods.end()) continue;
 
 		std::string toggleName = GetDisplayName(mod.first);
 		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName); // GetModID will return the file name is the mod isnt loaded, so just remove the file extension by getting the lib

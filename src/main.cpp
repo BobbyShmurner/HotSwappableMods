@@ -1,7 +1,6 @@
 #include "main.hpp"
 
 #include "Utils/ModUtils.hpp"
-#include "Utils/HiddenModConfigUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -35,6 +34,8 @@ ModInfo modInfo; // Stores the ID and version of our mod, and is sent to the mod
 
 extern HMUI::NoTransitionsButton* BackButton;
 extern std::list<std::string>* modsToToggle;
+
+std::list<std::string> NoNoMods = { "libHotSwappableMods", "libmodutils" }; // These cant be disabled no matter what
 
 DEFINE_CONFIG(MainConfig);
 

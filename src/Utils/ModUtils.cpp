@@ -1,6 +1,5 @@
 #include "Utils/ModUtils.hpp"
 #include "Utils/JNIUtils.hpp"
-#include "Utils/HiddenModConfigUtils.hpp"
 
 #include "UnityEngine/Application.hpp"
 
@@ -315,7 +314,7 @@ void ModUtils::CollectCoreMods() {
 	coreModsSS << coreModsFile.rdbuf();
 
 	rapidjson::Document coreModsDoc;
-	coreModsDoc.Parse(coreModsSS.str());
+	coreModsDoc.Parse(coreModsSS.str().c_str());
 
 	getLogger().info("Collecting Core Mods...");
 
