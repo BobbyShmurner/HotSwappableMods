@@ -1,6 +1,6 @@
 #include "main.hpp"
 
-#include "Utils/ModUtils.hpp"
+#include "modloader-utils/shared/ModloaderUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -35,7 +35,7 @@ ModInfo modInfo; // Stores the ID and version of our mod, and is sent to the mod
 extern HMUI::NoTransitionsButton* BackButton;
 extern std::list<std::string>* modsToToggle;
 
-std::list<std::string> NoNoMods = { "libHotSwappableMods", "libmodutils" }; // These cant be disabled no matter what
+std::list<std::string> NoNoMods = { "libHotSwappableMods", "libmodloader-utils" }; // These cant be disabled no matter what
 
 DEFINE_CONFIG(MainConfig);
 
@@ -85,7 +85,7 @@ MAKE_HOOK_MATCH(OnBackButton, &UnityEngine::UI::Button::Press, void, UnityEngine
 extern "C" void load() {
 	il2cpp_functions::Init();
 	getMainConfig().Init(modInfo);
-	ModUtils::Init();
+	ModloaderUtils::Init();
 
 	getLogger().info("Installing hooks...");
 	INSTALL_HOOK(getLogger(), OnBackButton);
@@ -100,9 +100,9 @@ extern "C" void load() {
 	if (getMainConfig().RemoveDuplicatesAtStartup.GetValue()) {
 		getLogger().info("Checking for duplicate files...");
 
-		if (ModUtils::RemoveDuplicateMods()) {
+		if (ModloaderUtils::RemoveDuplicateMods()) {
 			getLogger().info("Duplicate Mods found! Restarting...");
-			ModUtils::RestartBS();
+			ModloaderUtils::RestartGame();
 		} else {
 			getLogger().info("No Duplicate Mods Found");
 		}

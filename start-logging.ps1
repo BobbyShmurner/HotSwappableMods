@@ -16,7 +16,6 @@ if ($args[0] -eq "--file") {
     } else {
         adb logcat -T "$timestamp" --pid $bspid | Select-String -pattern "(QuestHook|modloader|AndroidRuntime)" | Out-File -FilePath $PSScriptRoot\logcat.log
     }
-    Stop-Transcript
 }
 if ($args[0] -eq "--self") {
     echo "Logging only this mod!"

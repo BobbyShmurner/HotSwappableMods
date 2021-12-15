@@ -1,7 +1,7 @@
 #include "ViewControllers/ModListViewController.hpp"
 
 #include "Utils/BobbyUtils.hpp"
-#include "Utils/ModUtils.hpp"
+#include "modloader-utils/shared/ModloaderUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -74,8 +74,8 @@ UnityEngine::UI::Button* restartButton;
 UnityEngine::UI::Button* cancelButton;
 
 std::string GetDisplayName(std::string name) {
-	if (getMainConfig().AlwaysShowFileNames.GetValue()) return ModUtils::GetLibName(name);
-	else return ModUtils::GetModID(name);
+	if (getMainConfig().AlwaysShowFileNames.GetValue()) return ModloaderUtils::GetLibName(name);
+	else return ModloaderUtils::GetModID(name);
 }
 
 UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool isImportant, bool isModLoaded) {
@@ -108,17 +108,17 @@ void GenerateModHoverHint(UnityEngine::GameObject* toggle, UnityEngine::GameObje
 
 	if (getMainConfig().ShowFileNameOnHoverHint.GetValue()) hoverMessage += string_format("File Name - %s", fileName.c_str());
 
-	bool isCore = ModUtils::IsCoreMod(fileName);
-	bool isLibrary = ModUtils::IsModALibrary(fileName);
+	bool isCore = ModloaderUtils::IsCoreMod(fileName);
+	bool isLibrary = ModloaderUtils::IsModALibrary(fileName);
 
-	if (!ModUtils::IsDisabled(fileName)) {
-		if (ModUtils::IsModLoaded(fileName)) {
+	if (!ModloaderUtils::IsDisabled(fileName)) {
+		if (ModloaderUtils::IsModLoaded(fileName)) {
 			if (!isLibrary) {
-				if (getMainConfig().ShowModIDOnHoverHint.GetValue()) 		hoverMessage += string_format("%sMod ID - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModID(fileName).c_str());
-				if (getMainConfig().ShowModVersionOnHoverHint.GetValue()) 	hoverMessage += string_format("%sMod Version - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModVersion(fileName).c_str());
+				if (getMainConfig().ShowModIDOnHoverHint.GetValue()) 		hoverMessage += string_format("%sMod ID - %s", hoverMessage == "" ? "" : "\n", ModloaderUtils::GetModID(fileName).c_str());
+				if (getMainConfig().ShowModVersionOnHoverHint.GetValue()) 	hoverMessage += string_format("%sMod Version - %s", hoverMessage == "" ? "" : "\n", ModloaderUtils::GetModVersion(fileName).c_str());
 			}
 		}
-		else if (getMainConfig().ShowModErrorsOnHoverHint.GetValue()) hoverMessage += string_format("%sFailed To Load! Reason - %s", hoverMessage == "" ? "" : "\n", ModUtils::GetModError(fileName)->c_str());
+		else if (getMainConfig().ShowModErrorsOnHoverHint.GetValue()) hoverMessage += string_format("%sFailed To Load! Reason - %s", hoverMessage == "" ? "" : "\n", ModloaderUtils::GetModError(fileName)->c_str());
 	}
 
 	if (getMainConfig().ShowModTypeOnHoverHint.GetValue()) { 
@@ -132,11 +132,11 @@ void GenerateModHoverHint(UnityEngine::GameObject* toggle, UnityEngine::GameObje
 }
 
 void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, bool isActive, bool isImportant) {
-	std::string fileName = ModUtils::GetFileName(toggleName);
+	std::string fileName = ModloaderUtils::GetFileName(toggleName);
 
 	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, isImportant, fileName](bool value){
 		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-		textMesh->set_color(GetTextColor(modsEnabled->at(fileName), value, isImportant, ModUtils::IsModLoaded(fileName)));
+		textMesh->set_color(GetTextColor(modsEnabled->at(fileName), value, isImportant, ModloaderUtils::IsModLoaded(fileName)));
 
 		if (value != modsEnabled->at(fileName)) modsToToggle->emplace_front(fileName);
 		else modsToToggle->remove(fileName);
@@ -147,7 +147,7 @@ void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, 
 	modToggles->emplace(toggleName, newToggle);
 
 	TMPro::TextMeshProUGUI* textMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-	textMesh->set_color(GetTextColor(modsEnabled->at(fileName), modsEnabled->at(fileName), isImportant, ModUtils::IsModLoaded(fileName)));
+	textMesh->set_color(GetTextColor(modsEnabled->at(fileName), modsEnabled->at(fileName), isImportant, ModloaderUtils::IsModLoaded(fileName)));
 
 	GenerateModHoverHint(newToggle->get_transform()->get_parent()->get_gameObject(), textMesh->get_gameObject(), fileName);
 }
@@ -167,17 +167,17 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std
 	int togglesCreated = 0;
 
 	for (std::pair<std::string, bool> mod : *mods) {
-		if (std::find(NoNoMods.begin(), NoNoMods.end(), ModUtils::GetLibName(mod.first)) != NoNoMods.end()) continue;
+		if (std::find(NoNoMods.begin(), NoNoMods.end(), ModloaderUtils::GetLibName(mod.first)) != NoNoMods.end()) continue;
 
 		std::string toggleName = GetDisplayName(mod.first);
-		if (ModUtils::IsFileName(toggleName)) toggleName = ModUtils::GetLibName(toggleName); // GetModID will return the file name is the mod isnt loaded, so just remove the file extension by getting the lib
+		if (ModloaderUtils::IsFileName(toggleName)) toggleName = ModloaderUtils::GetLibName(toggleName); // GetModID will return the file name is the mod isnt loaded, so just remove the file extension by getting the lib
 
-		if (ModUtils::IsCoreMod(toggleName)){
+		if (ModloaderUtils::IsCoreMod(toggleName)){
 			if (!areCoreMods) continue;
 		} else {
 			if (areCoreMods) continue;
 
-			if (ModUtils::IsModALibrary(toggleName)){
+			if (ModloaderUtils::IsModALibrary(toggleName)){
 				if (!areLibs) continue;
 			} else {
 				if (areLibs) continue;
@@ -194,16 +194,16 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<std
 void PopulateModsEnabledMap() {
 	modsEnabled->clear();
 
-	std::list<std::string> modsFolder = ModUtils::GetDirContents(ModUtils::GetModsFolder());
-	std::list<std::string> libsFolder = ModUtils::GetDirContents(ModUtils::GetLibsFolder());
+	std::list<std::string> modsFolder = ModloaderUtils::GetDirContents(ModloaderUtils::GetModsFolder());
+	std::list<std::string> libsFolder = ModloaderUtils::GetDirContents(ModloaderUtils::GetLibsFolder());
 
 	std::list<std::string> files = modsFolder;
 	files.merge(libsFolder);
 
 	for (std::string fileName : files) {
-		if (!ModUtils::IsFileName(fileName)) continue;
+		if (!ModloaderUtils::IsFileName(fileName)) continue;
 
-		if (ModUtils::IsDisabled(fileName)) modsEnabled->emplace(fileName, false);
+		if (ModloaderUtils::IsDisabled(fileName)) modsEnabled->emplace(fileName, false);
 		else modsEnabled->emplace(fileName, true);
 	}
 }
@@ -212,7 +212,7 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 	std::list<std::string> coreModsDisabled = std::list<std::string>();
 
 	for (std::string mod : *modsToToggle) {
-		if ((ModUtils::IsCoreMod(mod) || ModUtils::IsModALibrary(mod)) && modsEnabled->at(mod)) {
+		if ((ModloaderUtils::IsCoreMod(mod) || ModloaderUtils::IsModALibrary(mod)) && modsEnabled->at(mod)) {
 			coreModsDisabled.emplace_front(mod);
 		}
 	}
@@ -272,8 +272,8 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 	});
 
 	UnityEngine::UI::Button* confirm = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Im Sure", {"ApplyButton"}, [&](){
-		ModUtils::ToggleMods(modsToToggle);
-		ModUtils::RestartBS();
+		ModloaderUtils::ToggleMods(modsToToggle);
+		ModloaderUtils::RestartGame();
 	});
 
 	modal->Show(true, true, nullptr);
@@ -311,7 +311,7 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		restartButton->set_interactable(false);
 	}
 
-	ModUtils::GetOddLibNames();
+	ModloaderUtils::GetOddLibNames();
 
 	PopulateModsEnabledMap();
 
@@ -390,8 +390,8 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	restartButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", {"ApplyButton"}, [&](){
 		if (CoreModModal(get_transform())) return;
 		
-		ModUtils::ToggleMods(modsToToggle);
-		ModUtils::RestartBS();
+		ModloaderUtils::ToggleMods(modsToToggle);
+		ModloaderUtils::RestartGame();
 	});
 	restartButton->set_interactable(false);
 }

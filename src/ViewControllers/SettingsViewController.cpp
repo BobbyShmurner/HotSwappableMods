@@ -1,7 +1,7 @@
 #include "ViewControllers/SettingsViewController.hpp"
 
 #include "Utils/BobbyUtils.hpp"
-#include "Utils/ModUtils.hpp"
+#include "modloader-utils/shared/ModloaderUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 

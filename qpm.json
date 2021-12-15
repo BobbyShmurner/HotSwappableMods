@@ -4,7 +4,7 @@
   "info": {
     "name": "Hot Swappable Mods",
     "id": "HotSwappableMods",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "url": null,
     "additionalData": {}
   },
@@ -40,6 +40,11 @@
     },
     {
       "id": "config-utils",
+      "versionRange": "*",
+      "additionalData": {}
+    },
+    {
+      "id": "modloader-utils",
       "versionRange": "*",
       "additionalData": {}
     }
