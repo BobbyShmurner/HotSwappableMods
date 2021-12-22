@@ -1,4 +1,4 @@
-#include "ViewControllers/ModListViewController.hpp"
+#include "UI/ViewControllers/ModListViewController.hpp"
 
 #include "Utils/BobbyUtils.hpp"
 #include "modloader-utils/shared/ModloaderUtils.hpp"

@@ -2,21 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "NDK Build",
-            "detail": "Builds the library using ndk-build.cmd",
-            "type": "shell",
-            "command": "ndk-build",
-            "windows": {
-                "command": "ndk-build.cmd"
-            },
-            "args": ["NDK_PROJECT_PATH=.", "APP_BUILD_SCRIPT=./Android.mk", "NDK_APPLICATION_MK=./Application.mk"],
-            "group": "build",
-            "options": {
-                "env": {}
-            }
-        },
-        {
-            "label": "Powershell Build",
+            "label": "Build",
             "detail": "Builds the library using Powershell (recommended)",
             "type": "shell",
             "command": "./build.ps1",
@@ -32,57 +18,21 @@
             }
         },
         {
-            "label": "Powershell Build and Copy",
-            "detail": "Builds and copies the library to the Quest using ADB and force-quits Beat Saber",
+            "label": "Launch Beat Saber",
+            "detail": "Builds the library using Powershell, copies the library to you mods folder, an then launches Beat Saber",
             "type": "shell",
-            "command": "./copy.ps1",
+            "command": "./copy.ps1 --log --self",
             "windows": {
-                "command": "./copy.ps1"
-            },
-            "group": "build",
-            "options": {
-                "env": {}
+                "command": "./copy.ps1 --log --self"
             }
         },
         {
-            "label": "QMOD Build",
-            "detail": "Builds a .qmod to be installed into BMBF or QuestPatcher",
+            "label": "Launch Beat Saber with LogCat",
+            "detail": "Launches Beat Saber, and the log output is saved to \"logcat.log\"",
             "type": "shell",
-            "command": "./buildQMOD.ps1",
+            "command": "./copy.ps1 --log --file --all",
             "windows": {
-                "command": "./buildQMOD.ps1"
-            },
-            "args": [],
-            "group": "build",
-            "options": {
-                "env": {}
-            }
-        },
-        {
-            "label": "Start logging",
-            "detail": "Begin logging from the Quest to the console",
-            "type": "shell",
-            "command": "./start-logging.ps1",
-            "windows": {
-                "command": "./start-logging.ps1"
-            }
-        },
-        {
-            "label": "Start logging to file",
-            "detail": "Begin logging from the Quest to the console and saving output to a file 'logcat.log'",
-            "type": "shell",
-            "command": "./start-logging.ps1 --file",
-            "windows": {
-                "command": "./start-logging.ps1 --file"
-            }
-        },
-        {
-            "label": "Restart Beat Saber",
-            "detail": "Force-quits and restarts Beat Saber on the Quest",
-            "type": "shell",
-            "command": "./start-logging.ps1",
-            "windows": {
-                "command": "./start-logging.ps1"
+                "command": "./copy.ps1 --log --file --all"
             }
         }
     ]

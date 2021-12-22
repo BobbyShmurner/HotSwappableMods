@@ -4,8 +4,8 @@
 
 #include "DataTypes/MainConfig.hpp"
 
-#include "ViewControllers/ModListViewController.hpp"
-#include "ViewControllers/SettingsViewController.hpp"
+#include "UI/FlowCoordinators/ModListFlowCoordinator.hpp"
+#include "UI/ViewControllers/SettingsViewController.hpp"
 
 #include <dlfcn.h>
 #include <string.h>
@@ -70,15 +70,7 @@ extern "C" void setup(ModInfo& info) {
 	
 	getConfig().Load(); // Load the config file
 	getLogger().info("Completed setup!");
-}
-
-MAKE_HOOK_MATCH(OnBackButton, &UnityEngine::UI::Button::Press, void, UnityEngine::UI::Button* self) {
-	OnBackButton(self);
-
-	if (((UnityEngine::UI::Button*)BackButton) == self) {
-		if (modsToToggle->size() == 0) return;
-		ClearModsToToggle(); // This clears the mods to enable/disable list in the ModListViewController
-	}
+	getLogger().info("super sekrit noomber: %i", randNo);
 }
 
 // Called later on in the game loading - a good time to install function hooks
@@ -87,15 +79,8 @@ extern "C" void load() {
 	getMainConfig().Init(modInfo);
 	ModloaderUtils::Init();
 
-	getLogger().info("Installing hooks...");
-	INSTALL_HOOK(getLogger(), OnBackButton);
-	getLogger().info("Installed all hooks!");
-
-	getLogger().info("Setting Up QuestUI...");
-	QuestUI::Init();
-	QuestUI::Register::RegisterModSettingsViewController<HotSwappableMods::SettingsViewController*>(modInfo);
-	QuestUI::Register::RegisterMainMenuModSettingsViewController<HotSwappableMods::ModListViewController*>(modInfo);
-	getLogger().info("Setup QuestUI!");
+	//getLogger().info("Installing hooks...");
+	//getLogger().info("Installed all hooks!");
 
 	if (getMainConfig().RemoveDuplicatesAtStartup.GetValue()) {
 		getLogger().info("Checking for duplicate files...");
@@ -107,4 +92,11 @@ extern "C" void load() {
 			getLogger().info("No Duplicate Mods Found");
 		}
 	}
+
+	getLogger().info("Setting Up QuestUI...");
+	QuestUI::Init();
+	QuestUI::Register::RegisterModSettingsViewController<HotSwappableMods::SettingsViewController*>(modInfo);
+	//QuestUI::Register::RegisterMainMenuModSettingsViewController<HotSwappableMods::ModListViewController*>(modInfo);
+	QuestUI::Register::RegisterMainMenuModSettingsFlowCoordinator<HotSwappableMods::ModListFlowCoordinator*>(modInfo);
+	getLogger().info("Setup QuestUI!");
 }

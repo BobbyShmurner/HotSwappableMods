@@ -1,4 +1,4 @@
-#include "ViewControllers/SettingsViewController.hpp"
+#include "UI/ViewControllers/SettingsViewController.hpp"
 
 #include "Utils/BobbyUtils.hpp"
 #include "modloader-utils/shared/ModloaderUtils.hpp"
