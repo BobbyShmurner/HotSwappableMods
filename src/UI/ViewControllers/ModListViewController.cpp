@@ -68,8 +68,6 @@ TMPro::TextMeshProUGUI* dangerZoneDesc;
 TMPro::TextMeshProUGUI* coreModsText;
 TMPro::TextMeshProUGUI* libsText;
 
-
-HMUI::NoTransitionsButton* BackButton;
 UnityEngine::UI::Button* restartButton;
 UnityEngine::UI::Button* cancelButton;
 
@@ -315,8 +313,6 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 	PopulateModsEnabledMap();
 
-	BackButton = GameObject::Find(il2cpp_utils::newcsstr("BackButton"))->GetComponent<HMUI::NoTransitionsButton*>();
-
 	// Mod List
 
 	modText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Mod List", false);
@@ -361,6 +357,25 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		PopulateModToggles(mainContainer->get_transform(), modsEnabled, false, true);
 	}
 
+	// Question Mark Button - Has to be re-created cus the mod text is re-created
+
+	UnityEngine::UI::Button* questionButton = QuestUI::BeatSaberUI::CreateUIButton(modText->get_transform(), "?", "ApplyButton", [](){
+		getLogger().info("Damn bro thats crazy. -_-");
+	});
+
+
+	UnityEngine::RectTransform* questionRect = questionButton->GetComponent<UnityEngine::RectTransform*>();
+
+	//questionButton->get_transform()->set_localScale({0.5f, 0.5f});
+
+	questionRect->set_anchorMax({0.94, 0.5});
+	questionRect->set_anchorMin({0.94, 0.5});
+	questionRect->set_anchoredPosition({0.5, 0.5});
+
+	questionRect->set_sizeDelta({8, 8});
+
+	questionRect->GetComponentInChildren<TMPro::TextMeshProUGUI*>()->set_alignment(TMPro::TextAlignmentOptions::Left);
+
 	if (!firstActivation) return;
 
 	// Bottom Pannel
@@ -382,12 +397,12 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 	// Cancel Button
 
-	cancelButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Cancel", {"CancelButton"}, [](){
-		BackButton->get_onClick()->Invoke();
+	cancelButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Cancel", "CancelButton", [&](){
+		QuestUI::BeatSaberUI::GetMainFlowCoordinator()->YoungestChildFlowCoordinatorOrSelf()->BackButtonWasPressed(this);
 	});
 
 	// Restart Button
-	restartButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", {"ApplyButton"}, [&](){
+	restartButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", "ApplyButton", [&](){
 		if (CoreModModal(get_transform())) return;
 		
 		ModloaderUtils::ToggleMods(modsToToggle);

@@ -21,5 +21,7 @@ void HotSwappableMods::ModListFlowCoordinator::DidActivate(bool firstActivation,
 void HotSwappableMods::ModListFlowCoordinator::BackButtonWasPressed(HMUI::ViewController* topViewController){
     this->parentFlowCoordinator->DismissFlowCoordinator(this, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, false);
 
+    getLogger().info("gamer moment.");
+
 	ClearModsToToggle(); // This clears the mods to enable/disable list in the ModListViewController
 }
