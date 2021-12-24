@@ -102,7 +102,7 @@ void HotSwappableMods::InfoViewController::DidActivate(bool firstActivation, boo
 
 	// Gray Text
 
-	CREATE_COLOR_INFO(gray, 0.5, 0.5, 0.5, 0.5, "Gray", "Unoaded Mod");
+	CREATE_COLOR_INFO(gray, 0.55, 0.55, 0.55, 1, "Gray", "Unloaded Mod");
 
 	// Yellow Text
 
@@ -110,7 +110,7 @@ void HotSwappableMods::InfoViewController::DidActivate(bool firstActivation, boo
 
 	// Orange Text
 
-	CREATE_COLOR_INFO(orange, 1, 0.5, 0, 1, "Orange", "Mod failed to load. You can\n Check the Hover Hint for more detail");
+	CREATE_COLOR_INFO(orange, 1, 0.5, 0, 1, "Orange", "Mod failed to load. You can check the Hover Hint\n  for more detail");
 
 	// Red Text
 
@@ -119,5 +119,5 @@ void HotSwappableMods::InfoViewController::DidActivate(bool firstActivation, boo
 
 	// Green Text
 
-	CREATE_COLOR_INFO(green, 0, 1, 0, 1, "Green", "Important mod will be inabled when reloaded,\nwhich means that you SHOULD reload!");
+	CREATE_COLOR_INFO(green, 0, 1, 0, 1, "Green", "Important mod will be enabled when reloaded,\n  which means that you SHOULD reload!");
 }

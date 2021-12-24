@@ -83,25 +83,24 @@ std::string GetDisplayName(std::string name) {
 }
 
 UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool isImportant, bool isModLoaded) {
-	if (isCurrentlyEnabled != toggleValue) {
-			if (isImportant) {
-				if (!toggleValue) { // Is currently on, but will be disabled after restart
-					return {1.0f, 0.0f, 0.0f, 1.0f};
-				} else { // Is currently off, but will be enabled after restart
-					return {0.0f, 1.0f, 0.0f, 1.0f};
-				}
-			}
-			return {1.0f, 1.0f, 0.0f, 1.0f}; // Mod Will Change after restart
-		}
-		else {
-			if (!toggleValue) { 
-				if (isImportant) return {1.0f, 0.0f, 0.0f, 1.0f}; // Is currently off, SHOULD be turned on tho
-				else return {1.0f, 1.0f, 1.0f, 1.0f};
-			} else { // Is currently on, lets leave it that way xD
-				if (isModLoaded) return {1.0f, 1.0f, 1.0f, 1.0f};
-				else return {1.0f, 0.5f, 0.0f, 1.0f};
+	if (isCurrentlyEnabled != toggleValue) { // Is Value Different?
+		if (isImportant) {
+			if (!toggleValue) { // Is currently on, but will be disabled after restart
+				return {1.0f, 0.0f, 0.0f, 1.0f};
+			} else { // Is currently off, but will be enabled after restart
+				return {0.0f, 1.0f, 0.0f, 1.0f};
 			}
 		}
+		return {1.0f, 1.0f, 0.0f, 1.0f}; // Mod Will Change after restart
+	} else {
+		if (!toggleValue) {  // Is Mod Disabled?
+			if (isImportant) return {1.0f, 0.0f, 0.0f, 1.0f}; // Is currently off, SHOULD be turned on tho
+			else return {0.55f, 0.55f, 0.55f, 1.0f};
+		} else { // Is currently on, lets leave it that way xD
+			if (isModLoaded) return {1.0f, 1.0f, 1.0f, 1.0f};
+			else return {1.0f, 0.5f, 0.0f, 1.0f};
+		}
+	}
 
 	return {1.0f, 1.0f, 1.0f, 1.0f};
 }
