@@ -68,11 +68,14 @@ std::list<std::string>* modsToToggle = new std::list<std::string>();
 UnityEngine::GameObject* mainContainer;
 
 TMPro::TextMeshProUGUI* modText;
-TMPro::TextMeshProUGUI* noModsText;
-TMPro::TextMeshProUGUI* dangerZoneText;
-TMPro::TextMeshProUGUI* dangerZoneDesc;
 TMPro::TextMeshProUGUI* coreModsText;
 TMPro::TextMeshProUGUI* libsText;
+TMPro::TextMeshProUGUI* dangerZoneText;
+TMPro::TextMeshProUGUI* dangerZoneDesc;
+
+TMPro::TextMeshProUGUI* noModsText;
+TMPro::TextMeshProUGUI* noCoreModsText;
+TMPro::TextMeshProUGUI* noLibsText;
 
 UnityEngine::UI::Button* restartButton;
 UnityEngine::UI::Button* cancelButton;
@@ -310,6 +313,8 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	} else {
 		if (modText != nullptr) 		{ GameObject::Destroy(modText->get_gameObject()); modText = nullptr; }
 		if (noModsText != nullptr)		{ GameObject::Destroy(noModsText->get_gameObject()); noModsText = nullptr; }
+		if (noCoreModsText != nullptr)	{ GameObject::Destroy(noCoreModsText->get_gameObject()); noCoreModsText = nullptr; }
+		if (noLibsText != nullptr)		{ GameObject::Destroy(noLibsText->get_gameObject()); noLibsText = nullptr; }
 		if (dangerZoneText != nullptr)	{ GameObject::Destroy(dangerZoneText->get_gameObject()); dangerZoneText = nullptr; }
 		if (dangerZoneDesc != nullptr)	{ GameObject::Destroy(dangerZoneDesc->get_gameObject()); dangerZoneDesc = nullptr; }
 		if (coreModsText != nullptr)	{ GameObject::Destroy(coreModsText->get_gameObject()); coreModsText = nullptr; }
@@ -355,7 +360,12 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		coreModsText->set_alignment(TMPro::TextAlignmentOptions::Top);
 		coreModsText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
-		PopulateModToggles(mainContainer->get_transform(), modsEnabled, true, false);
+		int coreModCount = PopulateModToggles(mainContainer->get_transform(), modsEnabled, true, false);
+
+		if (coreModCount == 0) {
+			noCoreModsText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "No Core Mods Found!", false);
+			noCoreModsText->set_alignment(TMPro::TextAlignmentOptions::Center);
+		}
 	}
 
 	if (getMainConfig().ShowLibs.GetValue()) {
@@ -364,7 +374,12 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		libsText->set_alignment(TMPro::TextAlignmentOptions::Top);
 		libsText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
 
-		PopulateModToggles(mainContainer->get_transform(), modsEnabled, false, true);
+		int coreLibCount = PopulateModToggles(mainContainer->get_transform(), modsEnabled, false, true);
+
+		if (coreLibCount == 0) {
+			noLibsText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "No Libraries Found!", false);
+			noLibsText->set_alignment(TMPro::TextAlignmentOptions::Center);
+		}
 	}
 
 	// Question Mark Button - Has to be re-created cus the mod text is re-created
