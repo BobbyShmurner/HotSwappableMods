@@ -1,4 +1,5 @@
 #include "UI/ViewControllers/ModListViewController.hpp"
+#include "UI/FlowCoordinators/ModListFlowCoordinator.hpp"
 
 #include "Utils/BobbyUtils.hpp"
 #include "modloader-utils/shared/ModloaderUtils.hpp"
@@ -23,6 +24,9 @@
 #include "HMUI/Touchable.hpp"
 #include "HMUI/CurvedCanvasSettings.hpp"
 #include "HMUI/NoTransitionsButton.hpp"
+#include "HMUI/ViewController_AnimationDirection.hpp"
+#include "HMUI/ViewController_AnimationType.hpp"
+
 #include "TMPro/TextMeshProUGUI.hpp"
 
 #include "GlobalNamespace/BoolSettingsController.hpp"
@@ -48,6 +52,8 @@ using namespace UnityEngine::Events;
 using namespace HMUI;
 using namespace TMPro;
 using namespace Polyglot;
+
+bool ShouldRefreshList = true;
 
 extern ModInfo modInfo;
 extern std::list<std::string> NoNoMods;
@@ -280,6 +286,11 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 }
 
 void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
+	QuestUI::BeatSaberUI::GetMainFlowCoordinator()->YoungestChildFlowCoordinatorOrSelf()->SetTitle(il2cpp_utils::newcsstr("Mod List"), HMUI::ViewController::AnimationType::In);
+
+	if (!ShouldRefreshList) return;
+	ShouldRefreshList = false;
+
 	if (firstActivation) {
 		mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
 		
@@ -359,8 +370,9 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 	// Question Mark Button - Has to be re-created cus the mod text is re-created
 
-	UnityEngine::UI::Button* questionButton = QuestUI::BeatSaberUI::CreateUIButton(modText->get_transform(), "?", "ApplyButton", [](){
-		getLogger().info("Damn bro thats crazy. -_-");
+	UnityEngine::UI::Button* questionButton = QuestUI::BeatSaberUI::CreateUIButton(modText->get_transform(), "?", "ApplyButton", [&](){
+		HotSwappableMods::ModListFlowCoordinator* flowCoordinator = (HotSwappableMods::ModListFlowCoordinator*)(QuestUI::BeatSaberUI::GetMainFlowCoordinator()->YoungestChildFlowCoordinatorOrSelf());
+		flowCoordinator->PresentViewController(flowCoordinator->InfoViewController, nullptr, HMUI::ViewController::AnimationDirection::Horizontal, false);
 	});
 
 

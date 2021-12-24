@@ -3,14 +3,22 @@
 #include "HMUI/ViewController_AnimationDirection.hpp"
 #include "HMUI/ViewController_AnimationType.hpp"
 
+extern bool ShouldRefreshList;
+
 DEFINE_TYPE(HotSwappableMods, ModListFlowCoordinator);
 
 void HotSwappableMods::ModListFlowCoordinator::Awake() {
-    if (!ModListViewController) ModListViewController = QuestUI::BeatSaberUI::CreateViewController<HotSwappableMods::ModListViewController*>();
+    if (ShouldRefreshList) {
+        if (ModListViewController) DismissViewController(ModListViewController, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, true);
+        ModListViewController = QuestUI::BeatSaberUI::CreateViewController<HotSwappableMods::ModListViewController*>();
+
+        if (InfoViewController) DismissViewController(InfoViewController, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, true);
+        InfoViewController = QuestUI::BeatSaberUI::CreateViewController<HotSwappableMods::InfoViewController*>();
+    }
 }
 
-void HotSwappableMods::ModListFlowCoordinator::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling){
-    if(firstActivation){
+void HotSwappableMods::ModListFlowCoordinator::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
+    if(firstActivation) {
         static Il2CppString* titleName = il2cpp_utils::newcsstr("Mod List");
         SetTitle(titleName, HMUI::ViewController::AnimationType::In);
         showBackButton = true;
@@ -18,10 +26,13 @@ void HotSwappableMods::ModListFlowCoordinator::DidActivate(bool firstActivation,
     }
 }
 
-void HotSwappableMods::ModListFlowCoordinator::BackButtonWasPressed(HMUI::ViewController* topViewController){
-    this->parentFlowCoordinator->DismissFlowCoordinator(this, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, false);
+void HotSwappableMods::ModListFlowCoordinator::BackButtonWasPressed(HMUI::ViewController* topViewController) {
+    if (InfoViewController->get_isActivated()) {
+        DismissViewController(InfoViewController, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, false);
+    }
+    else {
+	    ClearModsToToggle(); // This clears the mods to enable/disable list in the ModListViewController
 
-    getLogger().info("gamer moment.");
-
-	ClearModsToToggle(); // This clears the mods to enable/disable list in the ModListViewController
+        this->parentFlowCoordinator->DismissFlowCoordinator(this, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, false);
+    }
 }
