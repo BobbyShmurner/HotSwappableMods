@@ -2,16 +2,16 @@
   "sharedDir": "shared",
   "dependenciesDir": "extern",
   "info": {
-    "name": "Hot Swappable Mods",
+    "name": "Hot-Swappable Mods",
     "id": "HotSwappableMods",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "url": null,
     "additionalData": {}
   },
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "=2.3.2",
+      "versionRange": "^2.3.0",
       "additionalData": {
         "extraFiles": [
           "src/inline-hook"
@@ -19,33 +19,38 @@
       }
     },
     {
-      "id": "modloader",
-      "versionRange": "*",
-      "additionalData": {}
-    },
-    {
       "id": "codegen",
       "versionRange": "=0.14.0",
       "additionalData": {}
     },
     {
-      "id": "custom-types",
-      "versionRange": "=0.12.7",
+      "id": "modloader-utils",
+      "versionRange": "^1.0.0",
       "additionalData": {}
     },
     {
       "id": "questui",
-      "versionRange": "*",
+      "versionRange": "^0.11.0",
       "additionalData": {}
     },
     {
       "id": "config-utils",
-      "versionRange": "*",
+      "versionRange": "^0.6.0",
       "additionalData": {}
     },
     {
-      "id": "modloader-utils",
-      "versionRange": "*",
+      "id": "custom-types",
+      "versionRange": "^0.12.0",
+      "additionalData": {}
+    },
+    {
+      "id": "modloader",
+      "versionRange": "^1.2.0",
+      "additionalData": {}
+    },
+    {
+      "id": "questui_components",
+      "versionRange": "^0.1.0",
       "additionalData": {}
     }
   ],

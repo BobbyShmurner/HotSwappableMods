@@ -1,0 +1,11 @@
+# ninja log v5
+44	5537	6620885773168299	CMakeFiles/HotSwappableMods_0_3_2.dir/src/Utils/BobbyUtils.cpp.o	e7ec679f6dfbd7f2
+47	15645	6620885873998300	CMakeFiles/HotSwappableMods_0_3_2.dir/src/main.cpp.o	c695271e0275312e
+30	11139	6620885828988304	CMakeFiles/HotSwappableMods_0_3_2.dir/src/UI/FlowCoordinators/ModListFlowCoordinator.cpp.o	f7bab2f8e4dd5cc8
+37	12630	6620885843868365	CMakeFiles/HotSwappableMods_0_3_2.dir/src/UI/ViewControllers/InfoViewController.cpp.o	92ac8540aac13ea9
+40	14963	6620885866868291	CMakeFiles/HotSwappableMods_0_3_2.dir/src/UI/ViewControllers/SettingsViewController.cpp.o	16b6e2eb26d331fe
+30	16455	6620894978972430	CMakeFiles/HotSwappableMods_0_3_2.dir/src/UI/ViewControllers/ModListViewController.cpp.o	145ae598c09d7254
+63	216	6620881204508608	CMakeFiles/HotSwappableMods_0_3_2.dir/extern/includes/beatsaber-hook/src/inline-hook/relocate.c.o	37a3b1937457b269
+58	236	6620881204718550	CMakeFiles/HotSwappableMods_0_3_2.dir/extern/includes/beatsaber-hook/src/inline-hook/inlineHook.c.o	f6df86db66fa7835
+51	1734	6620885734778303	CMakeFiles/HotSwappableMods_0_3_2.dir/extern/includes/beatsaber-hook/src/inline-hook/And64InlineHook.cpp.o	9f371fbe38ba3360
+16456	19116	6620895005472367	libHotSwappableMods_0_3_2.so	c7c1f0994339cc4e

@@ -1,18 +1,35 @@
+Param(
+    [Parameter(Mandatory=$false)]
+    [Switch] $log,
+
+    [Parameter(Mandatory=$false)]
+    [Switch] $self,
+
+    [Parameter(Mandatory=$false)]
+    [Switch] $all,
+
+    [Parameter(Mandatory=$false)]
+    [Switch] $custom,
+
+    [Parameter(Mandatory=$false)]
+    [Switch] $file
+)
+
 & $PSScriptRoot/build.ps1
-if ($?) {
+if ($LASTEXITCODE -eq 0) {
     adb push libs/arm64-v8a/libHotSwappableMods.so /sdcard/Android/data/com.beatgames.beatsaber/files/mods/libHotSwappableMods.so
     if ($?) {
         & $PSScriptRoot/restart-game.ps1
-        if ($args[0] -eq "--log") {
-            if ($args[1] -eq "--self") {
+        if ($log.IsPresent) {
+            if ($self.IsPresent) {
                 & $PSScriptRoot/start-logging.ps1 --self
-            } elseif ($args[1] -eq "--file") {
-                if ($args[2] -eq "--all") {
+            } elseif ($file.IsPresent) {
+                if ($all.IsPresent) {
                     & $PSScriptRoot/start-logging.ps1 --file --all
                 } else {
                     & $PSScriptRoot/start-logging.ps1 --file
                 }
-            } elseif ($args[1] -eq "--custom") {
+            } elseif ($custom.IsPresent) {
                 & $PSScriptRoot/start-logging.ps1 --custom $args[2]
             } else  {
                 & $PSScriptRoot/start-logging.ps1

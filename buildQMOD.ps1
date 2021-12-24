@@ -1,14 +1,65 @@
-# Builds a .qmod file for loading with QuestPatcher
-$NDKPath = Get-Content $PSScriptRoot/ndkpath.txt
+Param(
+    [String]$qmodname="",
+    [Parameter(Mandatory=$false)]
+    [Switch]$clean
+)
 
-$buildScript = "$NDKPath/build/ndk-build"
-if (-not ($PSVersionTable.PSEdition -eq "Core")) {
-    $buildScript += ".cmd"
+& $PSScriptRoot/build.ps1
+
+if ($LASTEXITCODE -ne 0) {
+    echo "Failed to build, exiting..."
+    exit
 }
 
-$ArchiveName = "HotSwappableMods_v0.3.1.qmod"
-$TempArchiveName = "HotSwappableMods_v0.3.1.qmod.zip"
+if ($qmodName -eq "")
+{
+    echo "Give a proper qmod name and try again"
+    exit
+}
 
-& $buildScript NDK_PROJECT_PATH=$PSScriptRoot APP_BUILD_SCRIPT=$PSScriptRoot/Android.mk NDK_APPLICATION_MK=$PSScriptRoot/Application.mk
-Compress-Archive -Path "./libs/arm64-v8a/libHotSwappableMods.so", "./libs/arm64-v8a/libbeatsaber-hook_2_3_2.so", "./cover.png", "./mod.json" -DestinationPath $TempArchiveName -Force
-Move-Item $TempArchiveName $ArchiveName -Force
+& "qpm-rust" qmod build
+
+echo "Creating qmod from mod.json"
+
+$mod = "./mod.json"
+$modJson = Get-Content $mod -Raw | ConvertFrom-Json
+
+$filelist = @($mod)
+
+$cover = "./" + $modJson.coverImage
+if ((-not ($cover -eq "./")) -and (Test-Path $cover))
+{ 
+    $filelist += ,$cover
+}
+
+foreach ($mod in $modJson.modFiles)
+{
+        $path = "./build/" + $mod
+    if (-not (Test-Path $path))
+    {
+        $path = "./extern/libs/" + $mod
+    }
+    $filelist += $path
+}
+
+foreach ($lib in $modJson.libraryFiles)
+{
+    $path = "./extern/libs/" + $lib
+    if (-not (Test-Path $path))
+    {
+        $path = "./build/" + $lib
+    }
+    $filelist += $path
+}
+
+$zip = $qmodName + ".zip"
+$qmod = $qmodName + ".qmod"
+
+if ((-not ($clean.IsPresent)) -and (Test-Path $qmod))
+{
+    echo "Making Clean Qmod"
+    Move-Item $qmod $zip -Force
+}
+
+Compress-Archive -Path $filelist -DestinationPath $zip -Update
+Move-Item $zip $qmod -Force

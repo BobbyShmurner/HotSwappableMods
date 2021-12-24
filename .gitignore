@@ -47,7 +47,10 @@ out/
 ndkpath.txt
 *.zip
 *.txt
+*.log
 extern/
 Android.mk.backup
 qpm.shared.json
-logcat.log
+
+# CMake
+cmake-build-*/
