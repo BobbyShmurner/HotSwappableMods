@@ -45,7 +45,7 @@ extern std::list<std::string>* modsToToggle;
 
 extern UnityEngine::GameObject* SeperatorTemplate;
 
-std::list<std::string> NoNoMods = { "libHotSwappableMods", "libmodloader-utils" }; // These cant be disabled no matter what
+std::list<std::string> NoNoMods = { "libHotSwappableMods", "libbeatsaber-hook_2_3_0", "libbeatsaber-hook_2_3_2", "libcodegen", "libcustom-types", "libquestui" }; // These cant be disabled no matter what
 
 DEFINE_CONFIG(MainConfig);
 
