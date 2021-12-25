@@ -1,11 +1,11 @@
 # ninja log v5
-44	5537	6620885773168299	CMakeFiles/HotSwappableMods_0_3_2.dir/src/Utils/BobbyUtils.cpp.o	e7ec679f6dfbd7f2
-47	15645	6620885873998300	CMakeFiles/HotSwappableMods_0_3_2.dir/src/main.cpp.o	c695271e0275312e
-30	11139	6620885828988304	CMakeFiles/HotSwappableMods_0_3_2.dir/src/UI/FlowCoordinators/ModListFlowCoordinator.cpp.o	f7bab2f8e4dd5cc8
-37	12630	6620885843868365	CMakeFiles/HotSwappableMods_0_3_2.dir/src/UI/ViewControllers/InfoViewController.cpp.o	92ac8540aac13ea9
-40	14963	6620885866868291	CMakeFiles/HotSwappableMods_0_3_2.dir/src/UI/ViewControllers/SettingsViewController.cpp.o	16b6e2eb26d331fe
-30	16455	6620894978972430	CMakeFiles/HotSwappableMods_0_3_2.dir/src/UI/ViewControllers/ModListViewController.cpp.o	145ae598c09d7254
-63	216	6620881204508608	CMakeFiles/HotSwappableMods_0_3_2.dir/extern/includes/beatsaber-hook/src/inline-hook/relocate.c.o	37a3b1937457b269
-58	236	6620881204718550	CMakeFiles/HotSwappableMods_0_3_2.dir/extern/includes/beatsaber-hook/src/inline-hook/inlineHook.c.o	f6df86db66fa7835
-51	1734	6620885734778303	CMakeFiles/HotSwappableMods_0_3_2.dir/extern/includes/beatsaber-hook/src/inline-hook/And64InlineHook.cpp.o	9f371fbe38ba3360
-16456	19116	6620895005472367	libHotSwappableMods_0_3_2.so	c7c1f0994339cc4e
+27	210	6621446095379965	CMakeFiles/HotSwappableMods.dir/extern/includes/beatsaber-hook/src/inline-hook/relocate.c.o	8aeda9329331dd04
+40	224	6621446095519965	CMakeFiles/HotSwappableMods.dir/extern/includes/beatsaber-hook/src/inline-hook/inlineHook.c.o	bb23d870b6874bd2
+19	692	6621446099920043	CMakeFiles/HotSwappableMods.dir/extern/includes/beatsaber-hook/src/inline-hook/And64InlineHook.cpp.o	990cad831259e92d
+12	5761	6621446150149976	CMakeFiles/HotSwappableMods.dir/src/Utils/BobbyUtils.cpp.o	fabdc57d99f21311
+2	11566	6621446208619956	CMakeFiles/HotSwappableMods.dir/src/UI/FlowCoordinators/ModListFlowCoordinator.cpp.o	6fb41fc4e550aa80
+6	12831	6621446221179973	CMakeFiles/HotSwappableMods.dir/src/UI/ViewControllers/InfoViewController.cpp.o	8e185a0340c719bb
+15	15593	6621446248819941	CMakeFiles/HotSwappableMods.dir/src/UI/ViewControllers/SettingsViewController.cpp.o	d3626ee33b4d1490
+23	16118	6621446254129972	CMakeFiles/HotSwappableMods.dir/src/main.cpp.o	6bd46ee84cccb69b
+9	18562	6621446278229922	CMakeFiles/HotSwappableMods.dir/src/UI/ViewControllers/ModListViewController.cpp.o	b188b292238d2173
+18563	21240	6621446305229638	libHotSwappableMods.so	cbbe95fd59ff8b7b

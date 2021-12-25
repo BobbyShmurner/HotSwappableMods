@@ -45,8 +45,7 @@ extern std::list<std::string>* modsToToggle;
 
 extern UnityEngine::GameObject* SeperatorTemplate;
 
-//std::list<std::string> NoNoMods = { "libHotSwappableMods", "libbeatsaber-hook_2_3_0", "libbeatsaber-hook_2_3_2", "libcodegen", "libcustom-types", "libquestui" }; // These cant be disabled no matter what
-std::list<std::string> NoNoMods = { };
+std::list<std::string> NoNoMods = { "libHotSwappableMods", "libbeatsaber-hook_2_3_0", "libbeatsaber-hook_2_3_2", "libcodegen", "libcustom-types", "libquestui" }; // These cant be disabled no matter what
 
 DEFINE_CONFIG(MainConfig);
 
@@ -117,7 +116,6 @@ extern "C" void load() {
 	getLogger().info("Setting Up QuestUI...");
 	QuestUI::Init();
 	QuestUI::Register::RegisterModSettingsViewController<HotSwappableMods::SettingsViewController*>(modInfo);
-	//QuestUI::Register::RegisterMainMenuModSettingsViewController<HotSwappableMods::ModListViewController*>(modInfo);
 	QuestUI::Register::RegisterMainMenuModSettingsFlowCoordinator<HotSwappableMods::ModListFlowCoordinator*>(modInfo);
 	getLogger().info("Setup QuestUI!");
 }

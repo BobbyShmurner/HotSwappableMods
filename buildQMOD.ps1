@@ -4,7 +4,7 @@ Param(
     [Switch]$clean
 )
 
-& $PSScriptRoot/build.ps1
+& $PSScriptRoot/build.ps1 -clean:$clean
 
 if ($LASTEXITCODE -ne 0) {
     echo "Failed to build, exiting..."
@@ -34,7 +34,7 @@ if ((-not ($cover -eq "./")) -and (Test-Path $cover))
 
 foreach ($mod in $modJson.modFiles)
 {
-        $path = "./build/" + $mod
+    $path = "./build/" + $mod
     if (-not (Test-Path $path))
     {
         $path = "./extern/libs/" + $mod

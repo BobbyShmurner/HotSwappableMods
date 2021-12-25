@@ -15,13 +15,17 @@ Param(
     [Switch] $file,
 
     [Parameter(Mandatory=$false)]
-    [Switch] $help
+    [Switch] $help,
+
+    [Parameter(Mandatory=$false)]
+    [Switch] $useDebug
 )
 
 if ($help -eq $true) {
     echo "`"Copy`" - Builds and copies your mod to your quest, and also starts Beat Saber with optional logging"
     echo "`n-- Arguments --`n"
 
+    echo "-UseDebug `t Copied the debug version of the mod to your quest"
     echo "-Log `t`t Logs Beat Saber using the `"Start-Logging`" command"
 
     echo "`n-- Logging Arguments --`n"
@@ -32,10 +36,18 @@ if ($help -eq $true) {
 }
 
 & $PSScriptRoot/build.ps1
-if ($LASTEXITCODE -eq 0) {
-    adb push libs/arm64-v8a/libHotSwappableMods.so /sdcard/Android/data/com.beatgames.beatsaber/files/mods/libHotSwappableMods.so
-    if ($?) {
-        & $PSScriptRoot/restart-game.ps1
-        if ($log -eq $true) { & $PSScriptRoot/start-logging.ps1 -self:$self -all:$all -custom:$custom -file:$file }
-    }
+
+if ($LASTEXITCODE -ne 0) {
+    echo "Failed to build, exiting..."
+    exit
 }
+
+if ($useDebug -eq $true) {
+    & adb push build/debug_libHotSwappableMods.so /sdcard/Android/data/com.beatgames.beatsaber/files/mods/libHotSwappableMods.so
+} else {
+    & adb push build/libHotSwappableMods.so /sdcard/Android/data/com.beatgames.beatsaber/files/mods/libHotSwappableMods.so
+}
+
+& $PSScriptRoot/restart-game.ps1
+
+if ($log -eq $true) { & $PSScriptRoot/start-logging.ps1 -self:$self -all:$all -custom:$custom -file:$file }

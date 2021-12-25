@@ -54,3 +54,5 @@ qpm.shared.json
 
 # CMake
 cmake-build-*/
+[Bb]uild/
+mod.json

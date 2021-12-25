@@ -6,7 +6,7 @@
 # It is included in the main 'build.ninja'.
 
 # =============================================================================
-# Project: HotSwappableMods_0_3_2
+# Project: HotSwappableMods
 # Configurations: Release
 # =============================================================================
 # =============================================================================
@@ -14,7 +14,7 @@
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__HotSwappableMods_0_3_2_Release
+rule C_COMPILER__HotSwappableMods_Release
   depfile = $DEP_FILE
   deps = gcc
   command = C:\Android\andriod-ndk\toolchains\llvm\prebuilt\windows-x86_64\bin\clang.exe --target=aarch64-none-linux-android24 --sysroot=C:/Android/andriod-ndk/toolchains/llvm/prebuilt/windows-x86_64/sysroot $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -24,7 +24,7 @@ rule C_COMPILER__HotSwappableMods_0_3_2_Release
 #############################################
 # Rule for compiling CXX files.
 
-rule CXX_COMPILER__HotSwappableMods_0_3_2_Release
+rule CXX_COMPILER__HotSwappableMods_Release
   depfile = $DEP_FILE
   deps = gcc
   command = C:\Android\andriod-ndk\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Android/andriod-ndk/toolchains/llvm/prebuilt/windows-x86_64/sysroot $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -34,7 +34,7 @@ rule CXX_COMPILER__HotSwappableMods_0_3_2_Release
 #############################################
 # Rule for linking CXX shared library.
 
-rule CXX_SHARED_LIBRARY_LINKER__HotSwappableMods_0_3_2_Release
+rule CXX_SHARED_LIBRARY_LINKER__HotSwappableMods_Release
   command = cmd.exe /C "$PRE_LINK && C:\Android\andriod-ndk\toolchains\llvm\prebuilt\windows-x86_64\bin\clang++.exe --target=aarch64-none-linux-android24 --sysroot=C:/Android/andriod-ndk/toolchains/llvm/prebuilt/windows-x86_64/sysroot -fPIC $LANGUAGE_COMPILE_FLAGS $ARCH_FLAGS $LINK_FLAGS -shared $SONAME_FLAG$SONAME -o $TARGET_FILE $in $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking CXX shared library $TARGET_FILE
   restat = $RESTAT
