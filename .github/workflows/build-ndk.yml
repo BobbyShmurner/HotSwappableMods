@@ -44,6 +44,10 @@ jobs:
       run: |
         chmod +x ./QPM/qpm-rust
         ./QPM/qpm-rust collapse
+    - name: Disable QPM Symlinks
+      run: |
+        chmod +x ./QPM/qpm-rust
+        ./QPM/qpm-rust config symlink disable
 
     - name: QPM Dependencies Cache
       id: cache-qpm-deps
