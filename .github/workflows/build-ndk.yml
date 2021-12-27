@@ -72,6 +72,8 @@ jobs:
       run: |
         echo workapsce:
         ls -la ${GITHUB_WORKSPACE}
+        echo extern file:
+        echo "$(cat ${GITHUB_WORKSPACE}/extern.cmake)"
         echo includes:
         ls -la ${GITHUB_WORKSPACE}/extern/includes
         echo libs:
