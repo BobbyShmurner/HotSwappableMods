@@ -37,15 +37,12 @@ $timestamp = Get-Date -Format "MM-dd HH:mm:ss.fff"
 $bspid = adb shell pidof com.beatgames.beatsaber
 $command = "adb logcat -T `"$timestamp`""
 
-# Set the buffer size to be 100M to avoid the "Uncexpected EOF!" error
-adb logcat -G 100M
-
-while ([string]::IsNullOrEmpty($bspid)) {
-    Start-Sleep -Milliseconds 100
-    $bspid = adb shell pidof com.beatgames.beatsaber
-}
-
 if ($all -eq $false) {
+    while ([string]::IsNullOrEmpty($bspid)) {
+        Start-Sleep -Milliseconds 100
+        $bspid = adb shell pidof com.beatgames.beatsaber
+    }
+
     $command += "--pid $bspid"
 }
 

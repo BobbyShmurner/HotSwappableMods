@@ -31,12 +31,10 @@
 *.out
 *.app
 
-# Compiled Beat Saber Mods
-*.qmod
-
 # VSCode config stuff
 !.vscode/c_cpp_properties.json
 !.vscode/tasks.json
+!.vscode/settings.json
 
 # NDK stuff
 out/
@@ -48,11 +46,20 @@ ndkpath.txt
 *.zip
 *.txt
 *.log
-extern/
 Android.mk.backup
-qpm.shared.json
 
-# CMake
-cmake-build-*/
-[Bb]uild/
+# QPM stuff
+[Ee]xtern/
+*.qmod
+qpm.shared.json
+qpm_defines.cmake
+![Cc][Mm]ake[Ll]ists.txt
 mod.json
+
+# CMake stuff
+[Bb]uild/
+cmake-build-*/
+extern.cmake
+
+# Exclude the setup file so people dont accidentally run it
+setup-package.ps1

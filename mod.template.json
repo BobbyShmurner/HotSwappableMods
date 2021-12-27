@@ -6,7 +6,7 @@
   "version": "${version}",
   "packageId": "com.beatgames.beatsaber",
   "packageVersion": "1.17.1",
-  "description": "Allows you to enable and disable your mods from in game!",
+  "description": "Allows you to easily reload mods from in game",
   "coverImage": "cover.png",
   "dependencies": [],
   "modFiles": [],

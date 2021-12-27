@@ -1,13 +1,22 @@
 Param(
-    [String]$qmodname="",
+    [String] $qmodname="",
+
     [Parameter(Mandatory=$false)]
-    [Switch]$clean
+    [Switch] $clean,
+
+    [Parameter(Mandatory=$false)]
+    [Switch] $help
 )
 
-& $PSScriptRoot/build.ps1 -clean:$clean
+if ($help -eq $true) {
+    echo "`"BuildQmod <qmodName>`" - Copiles your mod into a `".so`" or a `".a`" library"
+    echo "`n-- Parameters --`n"
+    echo "qmodName `t The file name of your qmod"
 
-if ($LASTEXITCODE -ne 0) {
-    echo "Failed to build, exiting..."
+    echo "`n-- Arguments --`n"
+
+    echo "-Clean `t`t Performs a clean build on both your library and the qmod"
+
     exit
 }
 
@@ -17,7 +26,12 @@ if ($qmodName -eq "")
     exit
 }
 
-& "qpm-rust" qmod build
+& $PSScriptRoot/build.ps1 -clean:$clean
+
+if ($LASTEXITCODE -ne 0) {
+    echo "Failed to build, exiting..."
+    exit
+}
 
 echo "Creating qmod from mod.json"
 
