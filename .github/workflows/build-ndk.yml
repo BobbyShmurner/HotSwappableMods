@@ -29,7 +29,7 @@ jobs:
       run: |
         echo "$ANDROID_NDK_LATEST_HOME" > ${GITHUB_WORKSPACE}/ndkpath.txt
         cat ${GITHUB_WORKSPACE}/ndkpath.txt
-        
+
     - name: Get QPM
       if: steps.cache-qpm.outputs.cache-hit != 'true'
       uses: dawidd6/action-download-artifact@v2
@@ -70,6 +70,8 @@ jobs:
 
     - name: List Post Restore
       run: |
+        echo workapsce:
+        ls -la ${GITHUB_WORKSPACE}
         echo includes:
         ls -la ${GITHUB_WORKSPACE}/extern/includes
         echo libs:
@@ -80,8 +82,8 @@ jobs:
     - name: Build
       run: |
         cd ${GITHUB_WORKSPACE}
-        pwsh -Command ./build.ps1
         ./QPM/qpm-rust qmod build
+        pwsh -Command ./build.ps1
 
     - name: Create Qmod
       run: |
