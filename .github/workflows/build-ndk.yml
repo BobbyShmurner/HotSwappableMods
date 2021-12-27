@@ -79,7 +79,7 @@ jobs:
         echo Modloader folder:
         ls -la  ${GITHUB_WORKSPACE}/extern/includes/modloader
         ls -la  ${GITHUB_WORKSPACE}/extern/includes/modloader/shared
-        echo {cat ${GITHUB_WORKSPACE}/extern/includes/modloader/shared}
+        echo "${cat ${GITHUB_WORKSPACE}/extern/includes/modloader/shared}"
         echo libs:
         ls -la ${GITHUB_WORKSPACE}/extern/libs
         echo cache:
