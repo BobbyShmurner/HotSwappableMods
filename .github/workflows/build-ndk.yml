@@ -29,6 +29,7 @@ jobs:
       run: |
         echo "$ANDROID_NDK_LATEST_HOME" > ${GITHUB_WORKSPACE}/ndkpath.txt
         cat ${GITHUB_WORKSPACE}/ndkpath.txt
+        
     - name: Get QPM
       if: steps.cache-qpm.outputs.cache-hit != 'true'
       uses: dawidd6/action-download-artifact@v2
@@ -61,6 +62,11 @@ jobs:
       run: |
         chmod +x ./QPM/qpm-rust
         ./QPM/qpm-rust restore
+
+    - name: QPM Legacy fix
+      run: |
+        chmod +x ./QPM/qpm-rust
+        ./QPM/qpm-rust cache legacy-fix
 
     - name: List Post Restore
       run: |
