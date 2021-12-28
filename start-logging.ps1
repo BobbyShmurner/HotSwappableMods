@@ -1,5 +1,8 @@
 Param(
     [Parameter(Mandatory=$false)]
+    [Switch] $restart,
+
+    [Parameter(Mandatory=$false)]
     [Switch] $self,
 
     [Parameter(Mandatory=$false)]
@@ -31,6 +34,10 @@ if ($help -eq $true) {
     echo "-File `t`t Saves the output of the log to `"logcat.log`""
 
     exit
+}
+
+if ($restart -eq $true) {
+    & $PSScriptRoot/restart-game.ps1
 }
 
 $timestamp = Get-Date -Format "MM-dd HH:mm:ss.fff"

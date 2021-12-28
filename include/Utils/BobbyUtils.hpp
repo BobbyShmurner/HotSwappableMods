@@ -24,9 +24,9 @@ public:
 	// Only allows you to call ToString<T> on types that actually HAVE
 	// a ToString method that returns a const char* (in this case)
 	template<class T>
-	requires ((std::is_pointer_v<T> && stringable<std::remove_pointer_t<T>>) || stringable<T>)
+	requires ((std::is_reference_v<T> && ((std::is_pointer_v<std::remove_reference_t<T>> && stringable<std::remove_pointer_t<std::remove_reference_t<T>>>) || stringable<std::remove_reference_t<T>>)) || (std::is_pointer_v<T> && stringable<std::remove_pointer_t<T>>) || stringable<T>)
 	static std::string ToString(T&& arg) {
-		if constexpr (std::is_pointer_v<T>) {
+		if constexpr (std::is_reference_v<T> || std::is_pointer_v<T>) {
 			return Il2cppStrToStr(arg->ToString());
 		} else {
 			return Il2cppStrToStr(arg.ToString());
