@@ -4,7 +4,7 @@
   "info": {
     "name": "Hot-Swappable Mods",
     "id": "HotSwappableMods",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "url": null,
     "additionalData": {
       "overrideSoName": "libHotSwappableMods.so"
@@ -13,12 +13,17 @@
   "dependencies": [
     {
       "id": "beatsaber-hook",
-      "versionRange": "^2.3.0",
+      "versionRange": "=2.3.2",
       "additionalData": {
         "extraFiles": [
           "src/inline-hook"
         ]
       }
+    },
+    {
+      "id": "modloader",
+      "versionRange": "=1.2.3",
+      "additionalData": {}
     },
     {
       "id": "codegen",
@@ -27,7 +32,7 @@
     },
     {
       "id": "modloader-utils",
-      "versionRange": "^1.0.0",
+      "versionRange": "^1.1.1",
       "additionalData": {}
     },
     {
@@ -37,22 +42,12 @@
     },
     {
       "id": "custom-types",
-      "versionRange": "^0.12.0",
-      "additionalData": {}
-    },
-    {
-      "id": "modloader",
-      "versionRange": "^1.2.0",
+      "versionRange": "^0.12.7",
       "additionalData": {}
     },
     {
       "id": "questui",
-      "versionRange": "^0.11.0",
-      "additionalData": {}
-    },
-    {
-      "id": "questui_components",
-      "versionRange": "^0.1.16",
+      "versionRange": "^0.11.1",
       "additionalData": {}
     }
   ],
