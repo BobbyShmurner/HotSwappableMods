@@ -79,7 +79,6 @@ TMPro::TextMeshProUGUI* noCoreModsText;
 TMPro::TextMeshProUGUI* noLibsText;
 
 UnityEngine::UI::Button* restartButton;
-UnityEngine::UI::Button* cancelButton;
 
 std::string GetDisplayName(std::string name) {
 	if (getMainConfig().AlwaysShowFileNames.GetValue()) return ModloaderUtils::GetLibName(name);
@@ -423,7 +422,7 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 	// Cancel Button
 
-	cancelButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Cancel", "CancelButton", [&](){
+	QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Cancel", "CancelButton", [&](){
 		QuestUI::BeatSaberUI::GetMainFlowCoordinator()->YoungestChildFlowCoordinatorOrSelf()->BackButtonWasPressed(this);
 	});
 
@@ -435,6 +434,45 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		ModloaderUtils::RestartGame();
 	});
 	restartButton->set_interactable(false);
+
+	QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Install ALL QMods", "ApplyButton", [&](){
+		rapidjson::Document document = ModloaderUtils::WebUtils::GetJSONData("http://questboard.xyz/api/mods/");
+		const auto &mods = document["mods"].GetArray();
+
+		for (rapidjson::SizeType i = 0; i < mods.Size(); i++)
+		{
+			auto &mod = mods[i];
+			std::string name = mod["name"].GetString();
+
+			if (name == "PinkCore") continue;
+
+			getLogger().info("Found Mod \"%s\"!", name.c_str());
+
+			const auto &downloads = mod["downloads"].GetArray();
+			for (rapidjson::SizeType j = 0; j < downloads.Size(); j++) {
+				auto &download = downloads[j];
+				const auto &gameVersions = download["gameversion"].GetArray();
+
+				int correctVersionIndex = -1;
+				for (rapidjson::SizeType k = 0; k < gameVersions.Size(); k++) {
+					std::string gameVersion = gameVersions[k].GetString();
+
+					if (gameVersion == ModloaderUtils::GetGameVersion()) {
+						getLogger().info("Got correct version for \"%s\"", name.c_str());
+						correctVersionIndex = k;
+						break;
+					}
+				}
+
+				if (correctVersionIndex != -1) {
+					std::string url = download["download"].GetString();
+
+					getLogger().info("Installing mod \"%s\" from url \"%s\"", name.c_str(), url.c_str());
+					ModloaderUtils::QMod::InstallFromUrl(name, url);
+				}
+			}
+		}
+	});
 }
 
 void ClearModsToToggle() {
