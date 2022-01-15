@@ -54,6 +54,4 @@ if ($useDebug -eq $true) {
 
 & adb push build/$fileName /sdcard/Android/data/com.beatgames.beatsaber/files/mods/$fileName
 
-& $PSScriptRoot/restart-game.ps1
-
-if ($log -eq $true) { & $PSScriptRoot/start-logging.ps1 -self:$self -all:$all -custom:$custom -file:$file }
+if ($log -eq $true) { & $PSScriptRoot/start-logging.ps1 -self:$self -all:$all -custom:$custom -file:$file -restart }
