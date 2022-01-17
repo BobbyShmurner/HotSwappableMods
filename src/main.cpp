@@ -14,7 +14,7 @@
 
 #include "questui/shared/QuestUI.hpp"
 
-#include "modloader\shared\modloader.hpp"
+#include "modloader/shared/modloader.hpp"
 
 #include "custom-types/shared/coroutine.hpp"
 
