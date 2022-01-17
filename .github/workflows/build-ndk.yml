@@ -1,7 +1,6 @@
 name: NDK build
 
 env:
-    ndkname: android-ndk-r23
     module_id: HotSwappableMods
     qmodName: Hot-Swappable_Mods
     cache-name: HotSwappableMods_cache
