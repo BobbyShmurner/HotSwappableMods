@@ -104,6 +104,22 @@ UnityEngine::Color GetTextColor(bool isInstalled, bool toggleValue, bool hasLoad
 	return {1.0f, 1.0f, 1.0f, 1.0f};
 }
 
+TMPro::TextMeshProUGUI* AddModalModListText(UnityEngine::Transform* modalTrans, std::string name, bool willBeDisabled) {
+	TMPro::TextMeshProUGUI* modText = QuestUI::BeatSaberUI::CreateText(modalTrans, std::string_view("- " + name), false);
+
+	modText->set_alignment(TMPro::TextAlignmentOptions::Center);
+
+	if (willBeDisabled) {
+		modText->set_color({1, 0, 0, 1});
+		modText->get_transform()->SetAsLastSibling();
+	} else {
+		modText->set_color({0, 1, 0, 1});
+		modText->get_transform()->SetSiblingIndex(2);
+	}
+
+	return modText;
+}
+
 void GenerateModHoverHint(UnityEngine::GameObject* toggle, QMod* qmod) {
 	if (!getMainConfig().ShowHoverHints.GetValue()) return;
 	std::string hoverMessage = "";
@@ -281,18 +297,48 @@ void HotSwappableMods::ModListViewController::ConfirmModal(bool isReloading) {
 
 	descriptionText->set_alignment(TMPro::TextAlignmentOptions::Center);
 
-	if (!isReloading) {
-		for (QMod* mod : *modsToToggle) {
-			TMPro::TextMeshProUGUI* modText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), std::string_view("- " + mod->Name()), false);
+	// I dont like this code, but it works soooooooo ¯\_(ツ)_/¯
 
-			modText->set_alignment(TMPro::TextAlignmentOptions::Center);
+	if (!isReloading) {
+		// This is just to make sure that the same mod isnt added to the list twice;
+		std::unordered_map<std::string, TMPro::TextMeshProUGUI*> modTextList;
+
+		for (QMod* mod : *modsToToggle) {
+			if (modTextList.contains(mod->Id())) {
+				if (modTextList[mod->Id()]->get_color() == UnityEngine::Color(1, 0, 0, 1)) {
+					modTextList[mod->Id()]->set_color({0, 1, 0, 1});
+					modTextList[mod->Id()]->get_transform()->SetSiblingIndex(2);
+				}
+
+				continue;
+			}
+			modTextList.emplace(mod->Id(), AddModalModListText(modalLayout->get_transform(), mod->Name(), mod->IsInstalled()));
 
 			if (mod->IsInstalled()) {
-				modText->set_color({1, 0, 0, 1});
-				modText->get_transform()->SetAsLastSibling();
+				for (QMod* dependentMod : mod->FindModsDependingOn(true)) {
+					if (modTextList.contains(dependentMod->Id())) continue;
+
+					modTextList.emplace(dependentMod->Id(), AddModalModListText(modalLayout->get_transform(), dependentMod->Name(), true));
+				}
 			} else {
-				modText->set_color({0, 1, 0, 1});
-				modText->get_transform()->SetSiblingIndex(2);
+				for (QModUtils::Dependency dependency : mod->Dependencies()) {
+					if (modTextList.contains(dependency.id)) {
+						if (modTextList[dependency.id]->get_color() == UnityEngine::Color(1, 0, 0, 1)) {
+							modTextList[dependency.id]->set_color({0, 1, 0, 1});
+							modTextList[dependency.id]->get_transform()->SetSiblingIndex(2);
+						}
+
+						continue;
+					}
+				
+					std::optional<QMod*> dependentMod = QMod::GetDownloadedQMod(dependency.id);
+
+					if (dependentMod.has_value()) {
+						if (!dependentMod.value()->IsInstalled()) modTextList.emplace(dependency.id, AddModalModListText(modalLayout->get_transform(), dependentMod.value()->Name(), false));
+					} else {
+						modTextList.emplace(dependency.id, AddModalModListText(modalLayout->get_transform(), dependency.id, false));
+					}
+				}
 			}
 		}
 	}
