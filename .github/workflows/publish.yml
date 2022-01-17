@@ -11,9 +11,9 @@ on:
       - 'v*'
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v2
       name: Checkout
@@ -88,8 +88,8 @@ jobs:
         ./QPM/qpm-rust package edit --version "${{ steps.get_tag_version.outputs.VERSION }}"
 
     - name: Build Qmod
-    run: |
-      pwsh -Command ./buildQMOD.ps1 ${{env.qmodName}} -clean
+      run: |
+        pwsh -Command ./buildQMOD.ps1 ${{env.qmodName}} -clean
 
     # Commit the change to the package, .vscode/c_cpp_properties.json, and Android.mk
     - name: Configure commit
