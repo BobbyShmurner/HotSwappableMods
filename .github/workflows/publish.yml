@@ -1,4 +1,4 @@
-name: Publish QPM Package
+name: Publish QMod
 
 env:
   module_id: HotSwappableMods
