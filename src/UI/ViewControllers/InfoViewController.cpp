@@ -1,7 +1,7 @@
 #include "UI/ViewControllers/InfoViewController.hpp"
 
 #include "Utils/BobbyUtils.hpp"
-#include "modloader-utils/shared/ModloaderUtils.hpp"
+#include "qmod-utils/shared/QModUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -108,16 +108,7 @@ void HotSwappableMods::InfoViewController::DidActivate(bool firstActivation, boo
 
 	CREATE_COLOR_INFO(yellow, 1, 1, 0, 1, "Yellow", "Mod will be loaded/unloaded on reload");
 
-	// Orange Text
-
-	CREATE_COLOR_INFO(orange, 1, 0.5, 0, 1, "Orange", "Mod failed to load. You can check the Hover Hint\n  for more detail");
-
 	// Red Text
 
-	CREATE_COLOR_INFO(red, 1, 0, 0, 1, "Red", "DO NOT DISABLE THIS MOD!!!");
-	redTextDesc->set_color({1, 0, 0, 1});
-
-	// Green Text
-
-	CREATE_COLOR_INFO(green, 0, 1, 0, 1, "Green", "Important mod will be enabled when reloaded,\n  which means that you SHOULD reload!");
+	CREATE_COLOR_INFO(orange, 1, 0, 0, 1, "Red", "Mod failed to load. You can check the Hover Hint\n  for more detail");
 }

@@ -47,4 +47,7 @@ void ClearModsToToggle();
 
 DECLARE_CLASS_CODEGEN(HotSwappableMods, ModListViewController, HMUI::ViewController,
 	DECLARE_OVERRIDE_METHOD(void, DidActivate, il2cpp_utils::FindMethodUnsafe("HMUI", "ViewController", "DidActivate", 3), bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling);
+	DECLARE_INSTANCE_METHOD(void, ConfirmModal, bool isReloading);
+
+	DECLARE_INSTANCE_FIELD(bool, IsRestarting);
 )

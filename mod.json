@@ -7,7 +7,23 @@
 	"packageId": "com.beatgames.beatsaber",
 	"packageVersion": "1.17.1",
 	"description": "Allows you to easily reload mods from in game",
-	"dependencies": [],
+	"dependencies": [
+		{
+			"id": "codegen",
+			"version": "=0.14.0",
+			"downloadIfMissing": "https://github.com/sc2ad/BeatSaber-Quest-Codegen/releases/download/v0.14.0/codegen_0_14_0.qmod"
+		},
+		{
+			"id": "custom-types",
+			"version": "=0.12.7",
+			"downloadIfMissing": "https://github.com/sc2ad/Il2CppQuestTypePatching/releases/download/v0.12.7/custom-types_v0_12_7.qmod"
+		},
+		{
+			"id": "questui",
+			"version": "=0.11.1",
+			"downloadIfMissing": "https://github.com/darknight1050/questui/releases/download/v0.11.1/questui.qmod"
+		}
+	],
 	"modFiles": [
 		"libHotSwappableMods.so"
 	],

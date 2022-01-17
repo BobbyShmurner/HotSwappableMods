@@ -27,6 +27,8 @@ void HotSwappableMods::ModListFlowCoordinator::DidActivate(bool firstActivation,
 }
 
 void HotSwappableMods::ModListFlowCoordinator::BackButtonWasPressed(HMUI::ViewController* topViewController) {
+    if (ModListViewController->IsRestarting) return;
+
     if (InfoViewController->get_isActivated()) {
         DismissViewController(InfoViewController, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, false);
     }

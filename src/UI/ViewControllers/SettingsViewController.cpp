@@ -1,7 +1,7 @@
 #include "UI/ViewControllers/SettingsViewController.hpp"
 
 #include "Utils/BobbyUtils.hpp"
-#include "modloader-utils/shared/ModloaderUtils.hpp"
+#include "qmod-utils/shared/QModUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -55,16 +55,9 @@ extern bool ShouldRefreshList;
 DEFINE_TYPE(HotSwappableMods, SettingsViewController);
 
 std::list<UnityEngine::GameObject*>* hoverHintSettings = new std::list<UnityEngine::GameObject*>();
-std::list<UnityEngine::GameObject*>* advancedSettings = new std::list<UnityEngine::GameObject*>();
 
 bool ShouldClearSettingsList = true;
 UnityEngine::GameObject* SeperatorTemplate = nullptr;
-
-void UpdateAdvandcedSettings(bool enabled) {
-	for (UnityEngine::GameObject* setting : *advancedSettings) {
-		setting->SetActive(enabled);
-	}
-}
 
 void UpdateHoverHintSettings(bool enabled) {
 	for (UnityEngine::GameObject* setting : *hoverHintSettings) {
@@ -113,7 +106,6 @@ UnityEngine::GameObject* CreateSeperator(UnityEngine::Transform* parent) {
 void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
 	if (ShouldClearSettingsList) {
 		hoverHintSettings->clear();
-		advancedSettings->clear();
 	}
 
 	if (!firstActivation) return;
@@ -188,59 +180,7 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 	hoverHintSettings->emplace_front(showModErrorsOnHoverHint->get_transform()->get_parent()->get_gameObject());
 	QuestUI::BeatSaberUI::AddHoverHint(showModErrorsOnHoverHint->get_gameObject(), "When enabled, an error will be displayed on the hover hints of mods that failed to load that explains why the mod failed to load");
 
-	// -- Advanced Settings --
-
-	CreateSeperator(mainContainer->get_transform());
-
-	// Show Advanced Settings
-
-	UnityEngine::UI::Toggle* showAdvancedSettings = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Advanced Settings", getMainConfig().ShowAdvancedSettings.GetValue(), [&](bool value){
-		UpdateAdvandcedSettings(value);
-		getMainConfig().ShowAdvancedSettings.SetValue(value);
-	});
-	QuestUI::BeatSaberUI::AddHoverHint(showAdvancedSettings->get_gameObject(), "When enabled, advandced settings will be displayed.\n\nMessing with these settings when you don't know what you are doing can very easily break your game, so it's better to just leave this off");
-
-	TMPro::TextMeshProUGUI* warningTitle = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "WARNING!", false);
-	advancedSettings->emplace_front(warningTitle->get_gameObject());
-
-	warningTitle->set_fontSize(10.0f);
-	warningTitle->set_alignment(TMPro::TextAlignmentOptions::Top); // This actually positions it at the bottom. Dont ask me why
-	warningTitle->set_color({1.0f, 0.0f, 0.0f, 1.0f});
-
-	TMPro::TextMeshProUGUI* warningDesc = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Dont mess with these settings unless you know what your doing.\nIf you break your game because of these settings, its on you - not us!\nYou Have Been Warned!!!", false, {0, 0}, {1, 20});
-	advancedSettings->emplace_front(warningDesc->get_gameObject());
-
-	warningDesc->set_alignment(TMPro::TextAlignmentOptions::Center);
-	warningDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
-
-	// Remove Duplicate Files At Startup
-
-	UnityEngine::UI::Toggle* removeDuplicatesAtStartup = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Remove Duplicate Files At Startup", getMainConfig().RemoveDuplicatesAtStartup.GetValue(), [](bool value){
-		getMainConfig().RemoveDuplicatesAtStartup.SetValue(value);
-	});
-	advancedSettings->emplace_front(removeDuplicatesAtStartup->get_transform()->get_parent()->get_gameObject());
-	QuestUI::BeatSaberUI::AddHoverHint(removeDuplicatesAtStartup->get_gameObject(), "When this is enabled, any \".disabled\" files will be removed if a \".so\" version is found.\n\nThere is no real reason for this to be turned off, so just leave this on unless you really have to disable it");
-
-	// Show Core Mods
-
-	UnityEngine::UI::Toggle* showCoreMods = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Core Mods", getMainConfig().ShowCoreMods.GetValue(), [](bool value){
-		getMainConfig().ShowCoreMods.SetValue(value);
-		ShouldRefreshList = true;
-	});
-	advancedSettings->emplace_front(showCoreMods->get_transform()->get_parent()->get_gameObject());
-	QuestUI::BeatSaberUI::AddHoverHint(showCoreMods->get_gameObject(), "When enabled, Core mods will be shown.\n\nDONT DO THIS UNLESS YOU KNOW WHAT YOU ARE DOING!");
-
-	// Show Libraries
-
-	UnityEngine::UI::Toggle* showLibs = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Libraries", getMainConfig().ShowLibs.GetValue(), [](bool value){
-		getMainConfig().ShowLibs.SetValue(value);
-		ShouldRefreshList = true;
-	});
-	advancedSettings->emplace_front(showLibs->get_transform()->get_parent()->get_gameObject());
-	QuestUI::BeatSaberUI::AddHoverHint(showLibs->get_gameObject(), "When enabled, Library mods will be shown.\n\nDisabling Library mods will almost 100% break something, so dont do it!");
-
 	// -- Update Toggles on first activation --
 
-	UpdateAdvandcedSettings(getMainConfig().ShowAdvancedSettings.GetValue());
 	UpdateHoverHintSettings(getMainConfig().ShowHoverHints.GetValue());
 }

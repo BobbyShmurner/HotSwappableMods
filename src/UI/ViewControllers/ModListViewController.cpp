@@ -2,7 +2,7 @@
 #include "UI/FlowCoordinators/ModListFlowCoordinator.hpp"
 
 #include "Utils/BobbyUtils.hpp"
-#include "modloader-utils/shared/ModloaderUtils.hpp"
+#include "qmod-utils/shared/QModUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -54,7 +54,7 @@ using namespace HMUI;
 using namespace TMPro;
 using namespace Polyglot;
 
-using QMod = ModloaderUtils::QMod;
+using QMod = QModUtils::QMod;
 
 bool ShouldRefreshList = true;
 
@@ -71,37 +71,33 @@ std::vector<QMod*>* modsToToggle = new std::vector<QMod*>();
 UnityEngine::GameObject* mainContainer;
 
 TMPro::TextMeshProUGUI* modText;
-TMPro::TextMeshProUGUI* coreModsText;
-TMPro::TextMeshProUGUI* dangerZoneText;
-TMPro::TextMeshProUGUI* dangerZoneDesc;
-
 TMPro::TextMeshProUGUI* noModsText;
-TMPro::TextMeshProUGUI* noCoreModsText;
 
-UnityEngine::UI::Button* restartButton;
+UnityEngine::UI::Button* toggleButton;
+UnityEngine::UI::Button* reloadButton;
 
 std::string GetDisplayName(QMod* qmod) {
 	if (getMainConfig().AlwaysShowFileNames.GetValue()) return qmod->FileName();
 	else return qmod->Name();
 }
 
-UnityEngine::Color GetTextColor(bool isCurrentlyEnabled, bool toggleValue, bool isImportant, bool isModLoaded) {
-	if (isCurrentlyEnabled != toggleValue) { // Is Value Different?
-		if (isImportant) {
-			if (!toggleValue) { // Is currently on, but will be disabled after restart
-				return {1.0f, 0.0f, 0.0f, 1.0f};
-			} else { // Is currently off, but will be enabled after restart
-				return {0.0f, 1.0f, 0.0f, 1.0f};
-			}
-		}
+bool HasLoadError(QMod* qmod) {
+	for (std::string fileName : qmod->ModFiles()) {
+		if (!QModUtils::IsModLibLoaded(fileName)) return true;
+	}
+
+	return false;
+}
+
+UnityEngine::Color GetTextColor(bool isInstalled, bool toggleValue, bool hasLoadError) {
+	if (isInstalled != toggleValue) { // Is Value Different?
 		return {1.0f, 1.0f, 0.0f, 1.0f}; // Mod Will Change after restart
 	} else {
 		if (!toggleValue) {  // Is Mod Disabled?
-			if (isImportant) return {1.0f, 0.0f, 0.0f, 1.0f}; // Is currently off, SHOULD be turned on tho
-			else return {0.55f, 0.55f, 0.55f, 1.0f};
-		} else { // Is currently on, lets leave it that way xD
-			if (isModLoaded) return {1.0f, 1.0f, 1.0f, 1.0f};
-			else return {1.0f, 0.5f, 0.0f, 1.0f};
+			return {0.55f, 0.55f, 0.55f, 1.0f};
+		} else { // Is currently on
+			if (!hasLoadError) return {1.0f, 1.0f, 1.0f, 1.0f};
+			else return {1.0f, 0.0f, 0.0f, 1.0f};
 		}
 	}
 
@@ -114,15 +110,13 @@ void GenerateModHoverHint(UnityEngine::GameObject* toggle, QMod* qmod) {
 
 	if (getMainConfig().ShowFileNameOnHoverHint.GetValue()) hoverMessage += string_format("File Name - %s", qmod->FileName().c_str());
 
-	bool isCore = qmod->IsCoreMod();
-
 	if (getMainConfig().ShowModIDOnHoverHint.GetValue()) 		hoverMessage += string_format("%sMod ID - %s", hoverMessage == "" ? "" : "\n", qmod->Id().c_str());
 	if (getMainConfig().ShowModVersionOnHoverHint.GetValue()) 	hoverMessage += string_format("%sMod Version - %s", hoverMessage == "" ? "" : "\n", qmod->Version().c_str());
 
-	if (qmod->Installed()) {
+	if (qmod->IsInstalled()) {
 		for (std::string fileName : qmod->ModFiles()) {
-			if (!ModloaderUtils::IsModLoaded(fileName) && getMainConfig().ShowModErrorsOnHoverHint.GetValue()) {
-				hoverMessage += string_format("%sFailed To Load! Reason - %s", hoverMessage == "" ? "" : "\n", ModloaderUtils::GetModError(fileName)->c_str());
+			if (!QModUtils::IsModLibLoaded(fileName) && getMainConfig().ShowModErrorsOnHoverHint.GetValue()) {
+				hoverMessage += string_format("%sFailed To Load! Reason - %s", hoverMessage == "" ? "" : "\n", QModUtils::GetModError(fileName)->c_str());
 			}
 		}
 	}
@@ -130,23 +124,23 @@ void GenerateModHoverHint(UnityEngine::GameObject* toggle, QMod* qmod) {
 	if (hoverMessage != "") QuestUI::BeatSaberUI::AddHoverHint(toggle, std::string_view(hoverMessage));
 }
 
-void CreateModToggle(UnityEngine::Transform* container, QMod* qmod, bool isActive, bool isImportant) {
+void CreateModToggle(UnityEngine::Transform* container, QMod* qmod, bool isActive) {
 	std::string toggleName = qmod->Name();
 
-	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, isImportant, qmod](bool value){
+	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, qmod](bool value) {
 		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-		textMesh->set_color(GetTextColor(modsEnabled->at(qmod), value, isImportant, qmod->Installed()));
+		textMesh->set_color(GetTextColor(qmod->IsInstalled(), value, HasLoadError(qmod)));
 
 		if (value != modsEnabled->at(qmod)) modsToToggle->push_back(qmod);
-		else std::remove(modsToToggle->begin(), modsToToggle->end(), qmod);
+		else modsToToggle->erase(std::remove(modsToToggle->begin(), modsToToggle->end(), qmod), modsToToggle->end());
 
-		restartButton->set_interactable(modsToToggle->size() != 0);
+		toggleButton->set_interactable(modsToToggle->size() != 0);
 	});
 
 	modToggles->emplace(toggleName, newToggle);
 
 	TMPro::TextMeshProUGUI* textMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-	textMesh->set_color(GetTextColor(modsEnabled->at(qmod), modsEnabled->at(qmod), isImportant, qmod->Installed()));
+	textMesh->set_color(GetTextColor(qmod->IsInstalled(), modsEnabled->at(qmod), HasLoadError(qmod)));
 
 	GenerateModHoverHint(newToggle->get_transform()->get_parent()->get_gameObject(), qmod);
 }
@@ -162,21 +156,19 @@ void ClearModToggles() {
 	modsEnabled->clear();
 }
 
-int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<QMod*, bool>* mods, bool areCoreMods = false) {
+int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<QMod*, bool>* mods) {
 	int togglesCreated = 0;
 
 	for (std::pair<QMod*, bool> modPair : *mods) {
-		// if (std::find(NoNoMods.begin(), NoNoMods.end(), ModloaderUtils::GetLibName(mod.first)) != NoNoMods.end()) continue;
+		if (modPair.first->Id() == "HotSwappableMods") continue;
 
 		std::string toggleName = GetDisplayName(modPair.first);
 
-		if (modPair.first->IsCoreMod()){
-			if (!areCoreMods) continue;
-		} else {
-			if (areCoreMods) continue;
+		if (modPair.first->IsCoreMod()) {
+			continue;
 		}
 		
-		CreateModToggle(container, modPair.first, modPair.second, areCoreMods);
+		CreateModToggle(container, modPair.first, modPair.second);
 		togglesCreated++;
 	}
 
@@ -187,9 +179,17 @@ void PopulateModsEnabledMap() {
 	modsEnabled->clear();
 
 	for (std::pair<std::string, QMod*> modPair : *QMod::DownloadedQMods) {
-		getLogger().info("Found downloaded mod \"%s\" (Enabled: %s)", modPair.second->Name().c_str(), modPair.second->Installed() ? "True" : "False");
-		modsEnabled->emplace(modPair.second, modPair.second->Installed());
+		getLogger().info("Found downloaded mod \"%s\" (Enabled: %s)", modPair.second->Name().c_str(), modPair.second->IsInstalled() ? "True" : "False");
+		modsEnabled->emplace(modPair.second, modPair.second->IsInstalled());
 	}
+}
+
+void OnReloadStart(QMod* qmod, TMPro::TextMeshProUGUI* loadingText) {
+	QuestUI::MainThreadScheduler::Schedule(
+		[qmod, loadingText] {
+			loadingText->SetText(il2cpp_utils::newcsstr(string_format("Reloading %s...", qmod->Name().c_str()).c_str()));
+		}
+	);
 }
 
 void OnToggleStart(QMod* qmod, bool settingActive, TMPro::TextMeshProUGUI* loadingText) {
@@ -200,7 +200,7 @@ void OnToggleStart(QMod* qmod, bool settingActive, TMPro::TextMeshProUGUI* loadi
 	);
 }
 
-void ToggleAndRestart(UnityEngine::Transform* trans) {
+void ToggleAndRestart(UnityEngine::Transform* trans, std::vector<QMod*>* mods, bool isReloading) {
 	HMUI::ModalView* loadingModal = QuestUI::BeatSaberUI::CreateModal(trans, {80, 15}, nullptr, false);
 
 	UnityEngine::UI::VerticalLayoutGroup* modalLayout = QuestUI::BeatSaberUI::CreateVerticalLayoutGroup(loadingModal->get_transform());
@@ -223,30 +223,36 @@ void ToggleAndRestart(UnityEngine::Transform* trans) {
 	loadingModal->Show(true, true, nullptr);
 
 	std::thread t(
-		[loadingText] {
-			ModloaderUtils::ToggleQMods(modsToToggle, [loadingText](QMod* qmod, bool settingActive){
-				OnToggleStart(qmod, settingActive, loadingText);
-			});
+		[mods, loadingText, isReloading] {
+			if (isReloading) {
+				QModUtils::ReloadMods(mods, [loadingText](QMod* qmod){
+					OnReloadStart(qmod, loadingText);
+				});
 
-			getLogger().info("Finished Toggling, Restarting Game!");
-			ModloaderUtils::RestartGame();
+			} else {
+				QModUtils::ToggleMods(mods, [loadingText](QMod* qmod, bool settingActive){
+					OnToggleStart(qmod, settingActive, loadingText);
+				});
+			}
+
+			getLogger().info("Finished %s, Restarting Game!", isReloading ? "Reloading" : "Toggling");
+			QModUtils::RestartGame();
 		}
 	);
 	t.detach();
 }
 
-bool CoreModModal(UnityEngine::Transform* trans) {
-	std::vector<QMod*> coreModsDisabled = std::vector<QMod*>();
+void HotSwappableMods::ModListViewController::ConfirmModal(bool isReloading) {
+	std::unordered_map<std::string, QMod*>* installedModsMap = QModUtils::GetInstalledQMods();
+	std::vector<QMod*>* installedMods = new std::vector<QMod*>();
 
-	for (QMod* mod : *modsToToggle) {
-		if (mod->IsCoreMod() && mod->Installed()) { // This may seem counterintuitive, but were checking looping through the list of mods that will be toggeled, so if a mod is currently installed, it should be added to the list as it will be disabled on reload
-			coreModsDisabled.push_back(mod);
-		}
+	for (std::pair<std::string, QMod*> modPair : *installedModsMap) {
+		if (!modPair.second->IsCoreMod()) installedMods->push_back(modPair.second);
 	}
 
-	if (coreModsDisabled.size() == 0) return false;
-
-	HMUI::ModalView* modal = QuestUI::BeatSaberUI::CreateModal(trans, {80, 75}, nullptr, true);
+	HMUI::ModalView* modal = nullptr;
+	if (isReloading) modal = QuestUI::BeatSaberUI::CreateModal(get_transform(), {80, 32}, nullptr, true);
+	else modal = QuestUI::BeatSaberUI::CreateModal(get_transform(), {80, 75}, nullptr, true);
 	
 	UnityEngine::UI::VerticalLayoutGroup* modalLayout = QuestUI::BeatSaberUI::CreateVerticalLayoutGroup(modal->get_transform());
 
@@ -261,18 +267,34 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 	modalLayout->set_childControlWidth(false);
 	modalLayout->set_childForceExpandWidth(true);
 
-	TMPro::TextMeshProUGUI* modalWarnText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Warning!"}, false);
-	modalWarnText->set_alignment(TMPro::TextAlignmentOptions::Center);
-	modalWarnText->set_color({1, 0, 0, 1});
-	modalWarnText->set_fontSize(8);
+	TMPro::TextMeshProUGUI* modalTitleText = nullptr;
+	if (isReloading) modalTitleText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Reload Mods"}, false);
+	else modalTitleText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Toggle Mods"}, false);
 
-	QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), {"Are you sure you wanna dissable to following mods?\n"}, false)->set_alignment(TMPro::TextAlignmentOptions::Center);
+	modalTitleText->set_alignment(TMPro::TextAlignmentOptions::Center);
+	modalTitleText->set_fontSize(8);
 
-	for (QMod* mod : coreModsDisabled) {
-		TMPro::TextMeshProUGUI* modText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), std::string_view("- " + mod->Name()), false);
+	TMPro::TextMeshProUGUI* descriptionText = nullptr;
 
-		modText->set_alignment(TMPro::TextAlignmentOptions::Center);
-		modText->set_color({1, 0, 0, 1});
+	if (isReloading) descriptionText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), string_format("Are you sure you wanna reload %i mods?", (int)installedMods->size()).c_str(), false);
+	else descriptionText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), "Are you sure you wanna toggle to following mods?\n", false);
+
+	descriptionText->set_alignment(TMPro::TextAlignmentOptions::Center);
+
+	if (!isReloading) {
+		for (QMod* mod : *modsToToggle) {
+			TMPro::TextMeshProUGUI* modText = QuestUI::BeatSaberUI::CreateText(modalLayout->get_transform(), std::string_view("- " + mod->Name()), false);
+
+			modText->set_alignment(TMPro::TextAlignmentOptions::Center);
+
+			if (mod->IsInstalled()) {
+				modText->set_color({1, 0, 0, 1});
+				modText->get_transform()->SetAsLastSibling();
+			} else {
+				modText->set_color({0, 1, 0, 1});
+				modText->get_transform()->SetSiblingIndex(2);
+			}
+		}
 	}
 
 	UnityEngine::UI::HorizontalLayoutGroup* bottomPannel = QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(modal->get_transform());
@@ -294,19 +316,23 @@ bool CoreModModal(UnityEngine::Transform* trans) {
 	bottomPannel->dyn_m_TotalMinSize() = {60, 5};
 	bottomPannel->dyn_m_TotalPreferredSize() = {60, 5};
 	
-	UnityEngine::UI::Button* cancel = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Cancel", {"CancelButton"}, [&](){
-		mainContainer->get_transform()->get_parent()->get_parent()->get_parent()->get_parent()->GetComponentInChildren<HMUI::ModalView*>()->Hide(true, nullptr);
+	UnityEngine::UI::Button* cancel = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Cancel", {"CancelButton"}, [=](){
+		modal->Hide(true, nullptr);
 	});
 
-	UnityEngine::UI::Button* confirm = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Im Sure", {"ApplyButton"}, [&](){
+	UnityEngine::UI::Button* confirm = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Im Sure", {"ApplyButton"}, [=](){
 		modal->Hide(true, nullptr);
 
-		ToggleAndRestart(trans);
+		IsRestarting = true;
+
+		if (isReloading) {
+			ToggleAndRestart(get_transform(), installedMods, true);
+		} else {
+			ToggleAndRestart(get_transform(), modsToToggle, false);
+		}
 	});
 
 	modal->Show(true, true, nullptr);
-
-	return true;
 }
 
 void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
@@ -329,20 +355,12 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		// Same idea with the text
 		modText = nullptr;
 		noModsText = nullptr;
-		noCoreModsText = nullptr;
-		dangerZoneText = nullptr;
-		dangerZoneDesc = nullptr;
-		coreModsText = nullptr;
 	} else {
 		if (modText != nullptr) 		{ GameObject::Destroy(modText->get_gameObject()); modText = nullptr; }
 		if (noModsText != nullptr)		{ GameObject::Destroy(noModsText->get_gameObject()); noModsText = nullptr; }
-		if (noCoreModsText != nullptr)	{ GameObject::Destroy(noCoreModsText->get_gameObject()); noCoreModsText = nullptr; }
-		if (dangerZoneText != nullptr)	{ GameObject::Destroy(dangerZoneText->get_gameObject()); dangerZoneText = nullptr; }
-		if (dangerZoneDesc != nullptr)	{ GameObject::Destroy(dangerZoneDesc->get_gameObject()); dangerZoneDesc = nullptr; }
-		if (coreModsText != nullptr)	{ GameObject::Destroy(coreModsText->get_gameObject()); coreModsText = nullptr; }
 
 		ClearModToggles();
-		restartButton->set_interactable(false);
+		toggleButton->set_interactable(false);
 	}
 
 	PopulateModsEnabledMap();
@@ -353,38 +371,11 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	modText->set_fontSize(10.0f);
 	modText->set_alignment(TMPro::TextAlignmentOptions::Center);
 
-	int modCount = PopulateModToggles(mainContainer->get_transform(), modsEnabled, false);
+	int modCount = PopulateModToggles(mainContainer->get_transform(), modsEnabled);
 
 	if (modCount == 0) {
 		noModsText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "No Mods Found!", false);
 		noModsText->set_alignment(TMPro::TextAlignmentOptions::Center);
-	}
-
-	// Danger Zone
-
-	if (getMainConfig().ShowCoreMods.GetValue()) {
-		dangerZoneText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "The Danger Zone!", false);
-		dangerZoneText->set_fontSize(12.0f);
-		dangerZoneText->set_alignment(TMPro::TextAlignmentOptions::Top); // This actually positions it at the bottom. Dont ask me why
-		dangerZoneText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
-
-		dangerZoneDesc = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Be very careful when messing with these!", false);
-		dangerZoneDesc->set_alignment(TMPro::TextAlignmentOptions::Center);
-		dangerZoneDesc->set_color({1.0f, 0.0f, 0.0f, 1.0f});
-	}
-
-	if (getMainConfig().ShowCoreMods.GetValue()) {
-		coreModsText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Core Mods", false);
-		coreModsText->set_fontSize(10.0f);
-		coreModsText->set_alignment(TMPro::TextAlignmentOptions::Top);
-		coreModsText->set_color({1.0f, 0.0f, 0.0f, 1.0f});
-
-		int coreModCount = PopulateModToggles(mainContainer->get_transform(), modsEnabled, true);
-
-		if (coreModCount == 0) {
-			noCoreModsText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "No Core Mods Found!", false);
-			noCoreModsText->set_alignment(TMPro::TextAlignmentOptions::Center);
-		}
 	}
 
 	if (!firstActivation) return;
@@ -397,8 +388,8 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	});
 
 	UnityEngine::RectTransform* questionRect = questionButton->GetComponent<UnityEngine::RectTransform*>();
-	questionRect->set_anchorMax({0.94, 0.1});
-	questionRect->set_anchorMin({0.94, 0.1});
+	questionRect->set_anchorMax({0.9, 0.9});
+	questionRect->set_anchorMin({0.9, 0.9});
 	questionRect->set_anchoredPosition({0.5, 0.5});
 
 	questionRect->set_sizeDelta({8, 8});
@@ -428,60 +419,67 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		QuestUI::BeatSaberUI::GetMainFlowCoordinator()->YoungestChildFlowCoordinatorOrSelf()->BackButtonWasPressed(this);
 	});
 
-	// Restart Button
-	restartButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", "ApplyButton", [&](){
-		if (CoreModModal(get_transform())) return;
-		
-		ToggleAndRestart(get_transform());
+	// Toggle Button
+
+	toggleButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Toggle Mods", "ApplyButton", [&](){
+		ConfirmModal(false);
 	});
-	restartButton->set_interactable(false);
+	toggleButton->set_interactable(false);
 
-	QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Install ALL QMods", "ApplyButton", [&](){
-		// QMod::InstallFromUrl("Qosmetics.qmod", "https://github.com/RedBrumbler/Qosmetics/releases/download/v1.3.3/Qosmetics.qmod");
-		// return;
+	// Reload Button
 
-		rapidjson::Document document = ModloaderUtils::WebUtils::GetJSONData("http://questboard.xyz/api/mods/");
-		const auto &mods = document["mods"].GetArray();
-
-		for (rapidjson::SizeType i = 0; i < mods.Size(); i++)
-		{
-			auto &mod = mods[i];
-			std::string name = mod["name"].GetString();
-
-			if (name == "PinkCore") continue;
-
-			getLogger().info("Found Mod \"%s\"!", name.c_str());
-
-			const auto &downloads = mod["downloads"].GetArray();
-			for (rapidjson::SizeType j = 0; j < downloads.Size(); j++) {
-				auto &download = downloads[j];
-				const auto &gameVersions = download["gameversion"].GetArray();
-
-				int correctVersionIndex = -1;
-				for (rapidjson::SizeType k = 0; k < gameVersions.Size(); k++) {
-					std::string gameVersion = gameVersions[k].GetString();
-
-					if (gameVersion == ModloaderUtils::GetGameVersion()) {
-						getLogger().info("Got correct version for \"%s\"", name.c_str());
-						correctVersionIndex = k;
-						break;
-					}
-				}
-
-				if (correctVersionIndex != -1) {
-					std::string url = download["download"].GetString();
-
-					getLogger().info("Installing mod \"%s\" from url \"%s\"", name.c_str(), url.c_str());
-					QMod::InstallFromUrl(name + ".qmod", url);
-				}
-			}
-		}
+	reloadButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", "ApplyButton", [&](){
+		ConfirmModal(true);
 	});
 
-	QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Fuck Modlist.", "ApplyButton", [&](){
-		QMod* modList = QMod::GetDownloadedQMod("mod-list");
-		if (modList != nullptr) modList->Uninstall(false);
-	});
+	// -- In Game Downloading Test --
+
+	// QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Install ALL QMods", "ApplyButton", [&](){
+	// 	// QMod::InstallFromUrl("Qosmetics.qmod", "https://github.com/RedBrumbler/Qosmetics/releases/download/v1.3.3/Qosmetics.qmod");
+	// 	// return;
+
+	// 	rapidjson::Document document = QModUtils::WebUtils::GetJSONData("http://questboard.xyz/api/mods/").value();
+	// 	const auto &mods = document["mods"].GetArray();
+
+	// 	for (rapidjson::SizeType i = 0; i < mods.Size(); i++)
+	// 	{
+	// 		auto &mod = mods[i];
+	// 		std::string name = mod["name"].GetString();
+
+	// 		if (name == "PinkCore") continue;
+
+	// 		getLogger().info("Found Mod \"%s\"!", name.c_str());
+
+	// 		const auto &downloads = mod["downloads"].GetArray();
+	// 		for (rapidjson::SizeType j = 0; j < downloads.Size(); j++) {
+	// 			auto &download = downloads[j];
+	// 			const auto &gameVersions = download["gameversion"].GetArray();
+
+	// 			int correctVersionIndex = -1;
+	// 			for (rapidjson::SizeType k = 0; k < gameVersions.Size(); k++) {
+	// 				std::string gameVersion = gameVersions[k].GetString();
+
+	// 				if (gameVersion == QModUtils::GetGameVersion()) {
+	// 					getLogger().info("Got correct version for \"%s\"", name.c_str());
+	// 					correctVersionIndex = k;
+	// 					break;
+	// 				}
+	// 			}
+
+	// 			if (correctVersionIndex != -1) {
+	// 				std::string url = download["download"].GetString();
+
+	// 				getLogger().info("Installing mod \"%s\" from url \"%s\"", name.c_str(), url.c_str());
+	// 				QMod::InstallFromUrl(name + ".qmod", url);
+	// 			}
+	// 		}
+	// 	}
+	// });
+
+	// QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Fuck Modlist.", "ApplyButton", [&](){
+	// 	QMod* modList = QMod::GetDownloadedQMod("mod-list");
+	// 	if (modList != nullptr) modList->Uninstall(false);
+	// });
 }
 
 void ClearModsToToggle() {

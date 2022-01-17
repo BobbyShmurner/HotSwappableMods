@@ -31,8 +31,8 @@
       "additionalData": {}
     },
     {
-      "id": "modloader-utils",
-      "versionRange": "^1.1.1",
+      "id": "qmod-utils",
+      "versionRange": "^0.1.0",
       "additionalData": {}
     },
     {

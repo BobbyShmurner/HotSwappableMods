@@ -17,8 +17,7 @@ DECLARE_CONFIG(MainConfig,
 
     CONFIG_VALUE(ShowAdvancedSettings, bool, "ShowAdvancedSettings", false);
     CONFIG_VALUE(ShowCoreMods, bool, "ShowCoreMods", false);
-    CONFIG_VALUE(ShowLibs, bool, "ShowLibs", false);
-    CONFIG_VALUE(RemoveDuplicatesAtStartup, bool, "RemoveDuplicatesAtStartup", true);
+    CONFIG_VALUE(DownloadCoreModsAtStartup, bool, "DownloadCoreModsAtStartup", true);
 
     CONFIG_INIT_FUNCTION(
         CONFIG_INIT_VALUE(AlwaysShowFileNames);
@@ -32,7 +31,6 @@ DECLARE_CONFIG(MainConfig,
 
         CONFIG_INIT_VALUE(ShowAdvancedSettings);
         CONFIG_INIT_VALUE(ShowCoreMods);
-        CONFIG_INIT_VALUE(ShowLibs);
-        CONFIG_INIT_VALUE(RemoveDuplicatesAtStartup);
+        CONFIG_INIT_VALUE(DownloadCoreModsAtStartup);
     )
 )

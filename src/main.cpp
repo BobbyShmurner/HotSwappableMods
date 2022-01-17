@@ -1,6 +1,6 @@
 #include "main.hpp"
 
-#include "modloader-utils/shared/ModloaderUtils.hpp"
+#include "qmod-utils/shared/QModUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
 
@@ -96,22 +96,11 @@ MAKE_HOOK_MATCH(OnSoftRestart, &GlobalNamespace::MenuTransitionsHelper::RestartG
 extern "C" void load() {
 	il2cpp_functions::Init();
 	getMainConfig().Init(modInfo);
-	ModloaderUtils::Init();
+	QModUtils::Init();
 
 	getLogger().info("Installing hooks...");
 	INSTALL_HOOK(getLogger(), OnSoftRestart);
 	getLogger().info("Installed all hooks!");
-
-	if (getMainConfig().RemoveDuplicatesAtStartup.GetValue()) {
-		getLogger().info("Checking for duplicate files...");
-
-		if (ModloaderUtils::RemoveDuplicateMods()) {
-			getLogger().info("Duplicate Mods found! Restarting...");
-			ModloaderUtils::RestartGame();
-		} else {
-			getLogger().info("No Duplicate Mods Found");
-		}
-	}
 
 	getLogger().info("Setting Up QuestUI...");
 	QuestUI::Init();
