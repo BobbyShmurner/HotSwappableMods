@@ -28,7 +28,7 @@ if ($qmodName -eq "")
     exit
 }
 
-& $PSScriptRoot/build.ps1 -clean:$clean
+& $PSScriptRoot/build.ps1 -clean:$clean -release
 
 if ($LASTEXITCODE -ne 0) {
     echo "Failed to build, exiting..."
