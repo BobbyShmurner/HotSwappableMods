@@ -3,6 +3,9 @@ Param(
     [Switch] $clean,
 
     [Parameter(Mandatory=$false)]
+    [Switch] $release,
+
+    [Parameter(Mandatory=$false)]
     [Switch] $help
 )
 
@@ -31,7 +34,13 @@ if (($clean.IsPresent) -or (-not (Test-Path -Path "build")))
     $out = new-item -Path build -ItemType Directory
 } 
 
+$releaseType = "Debug"
+if ($release.IsPresent)
+{
+    $releaseType = "Release"
+}
+
 cd build
-& cmake -G "Ninja" -DCMAKE_BUILD_TYPE="Release" ../
+& cmake -G "Ninja" -DCMAKE_BUILD_TYPE=$releaseType ../
 & cmake --build .
 cd ..
