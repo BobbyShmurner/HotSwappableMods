@@ -89,12 +89,20 @@ jobs:
         files=( $pattern )
         echo ::set-output name=NAME::"${files[0]}"
         
+    - name: Build Debug
+      run: |
+        pwsh -Command ./build.ps1 -clean
+        
     - name: Upload debug artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ steps.libname.outputs.NAME }}
         path: ./build/debug_${{ steps.libname.outputs.NAME }}
         if-no-files-found: error
+        
+    - name: Build Release
+      run: |
+        pwsh -Command ./build.ps1 -clean -release
 
     - name: Upload non-debug artifact
       uses: actions/upload-artifact@v2
