@@ -81,23 +81,15 @@ std::string GetDisplayName(QMod* qmod) {
 	else return qmod->Name();
 }
 
-bool HasLoadError(QMod* qmod) {
-	for (std::string fileName : qmod->ModFiles()) {
-		if (!QModUtils::IsModLibLoaded(fileName)) return true;
-	}
-
-	return false;
-}
-
-UnityEngine::Color GetTextColor(bool isInstalled, bool toggleValue, bool hasLoadError) {
-	if (isInstalled != toggleValue) { // Is Value Different?
+UnityEngine::Color GetTextColor(QMod* mod, bool toggleValue) {
+	if (mod->IsInstalled() != toggleValue) { // Is Value Different?
 		return {1.0f, 1.0f, 0.0f, 1.0f}; // Mod Will Change after restart
 	} else {
 		if (!toggleValue) {  // Is Mod Disabled?
 			return {0.55f, 0.55f, 0.55f, 1.0f};
 		} else { // Is currently on
-			if (!hasLoadError) return {1.0f, 1.0f, 1.0f, 1.0f};
-			else return {1.0f, 0.0f, 0.0f, 1.0f};
+			if (QModUtils::ModHasError(mod)) return {1.0f, 0.0f, 0.0f, 1.0f};
+			else return {1.0f, 1.0f, 1.0f, 1.0f};
 		}
 	}
 
@@ -122,7 +114,9 @@ TMPro::TextMeshProUGUI* AddModalModListText(UnityEngine::Transform* modalTrans, 
 
 void GenerateModHoverHint(UnityEngine::GameObject* toggle, QMod* qmod) {
 	if (!getMainConfig().ShowHoverHints.GetValue()) return;
+
 	std::string hoverMessage = "";
+	hoverMessage.reserve(100); // This is to avoid reallocating every time we push back. If there is a error there will most likely be another alloc
 
 	if (getMainConfig().ShowFileNameOnHoverHint.GetValue()) hoverMessage += string_format("File Name - %s", qmod->FileName().c_str());
 
@@ -130,22 +124,20 @@ void GenerateModHoverHint(UnityEngine::GameObject* toggle, QMod* qmod) {
 	if (getMainConfig().ShowModVersionOnHoverHint.GetValue()) 	hoverMessage += string_format("%sMod Version - %s", hoverMessage == "" ? "" : "\n", qmod->Version().c_str());
 
 	if (qmod->IsInstalled()) {
-		for (std::string fileName : qmod->ModFiles()) {
-			if (!QModUtils::IsModLibLoaded(fileName) && getMainConfig().ShowModErrorsOnHoverHint.GetValue()) {
-				hoverMessage += string_format("%sFailed To Load! Reason - %s", hoverMessage == "" ? "" : "\n", QModUtils::GetModError(fileName)->c_str());
-			}
+		if (getMainConfig().ShowModErrorsOnHoverHint.GetValue()) {
+			std::optional<std::string> error = QModUtils::GetModError(qmod);
+
+			if (error.has_value()) hoverMessage += string_format("%sFailed To Load! Reason - %s", hoverMessage == "" ? "" : "\n", error.value().c_str());
 		}
 	}
 
-	if (hoverMessage != "") QuestUI::BeatSaberUI::AddHoverHint(toggle, std::string_view(hoverMessage));
+	if (hoverMessage != "") QuestUI::BeatSaberUI::AddHoverHint(toggle, hoverMessage);
 }
 
-void CreateModToggle(UnityEngine::Transform* container, QMod* qmod, bool isActive) {
-	std::string toggleName = qmod->Name();
-
+void CreateModToggle(UnityEngine::Transform* container, std::string toggleName, QMod* qmod, bool isActive) {
 	UnityEngine::UI::Toggle* newToggle = QuestUI::BeatSaberUI::CreateToggle(container, std::string_view(toggleName), isActive, [&, toggleName, qmod](bool value) {
 		TMPro::TextMeshProUGUI* textMesh = modToggles->at(toggleName)->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-		textMesh->set_color(GetTextColor(qmod->IsInstalled(), value, HasLoadError(qmod)));
+		textMesh->set_color(GetTextColor(qmod, value));
 
 		if (value != modsEnabled->at(qmod)) modsToToggle->push_back(qmod);
 		else modsToToggle->erase(std::remove(modsToToggle->begin(), modsToToggle->end(), qmod), modsToToggle->end());
@@ -155,8 +147,8 @@ void CreateModToggle(UnityEngine::Transform* container, QMod* qmod, bool isActiv
 
 	modToggles->emplace(toggleName, newToggle);
 
-	TMPro::TextMeshProUGUI* textMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr<il2cpp_utils::CreationType::Manual>("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
-	textMesh->set_color(GetTextColor(qmod->IsInstalled(), modsEnabled->at(qmod), HasLoadError(qmod)));
+	TMPro::TextMeshProUGUI* textMesh = newToggle->get_transform()->get_parent()->Find(il2cpp_utils::newcsstr("NameText"))->GetComponent<TMPro::TextMeshProUGUI*>();
+	textMesh->set_color(GetTextColor(qmod, modsEnabled->at(qmod)));
 
 	GenerateModHoverHint(newToggle->get_transform()->get_parent()->get_gameObject(), qmod);
 }
@@ -184,7 +176,7 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<QMo
 			continue;
 		}
 		
-		CreateModToggle(container, modPair.first, modPair.second);
+		CreateModToggle(container, toggleName, modPair.first, modPair.second);
 		togglesCreated++;
 	}
 
@@ -194,7 +186,7 @@ int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<QMo
 void PopulateModsEnabledMap() {
 	modsEnabled->clear();
 
-	for (std::pair<std::string, QMod*> modPair : *QMod::DownloadedQMods) {
+	for (std::pair<std::string, QMod*> modPair : *QMod::GetDownloadedQMods()) {
 		getLogger().info("Found downloaded mod \"%s\" (Enabled: %s)", modPair.second->Name().c_str(), modPair.second->IsInstalled() ? "True" : "False");
 		modsEnabled->emplace(modPair.second, modPair.second->IsInstalled());
 	}

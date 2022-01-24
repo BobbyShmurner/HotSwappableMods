@@ -45,8 +45,6 @@ extern std::list<std::string>* modsToToggle;
 
 extern UnityEngine::GameObject* SeperatorTemplate;
 
-std::list<std::string> NoNoMods = { "libHotSwappableMods", "libbeatsaber-hook_2_3_0", "libbeatsaber-hook_2_3_2", "libcodegen", "libcustom-types", "libquestui" }; // These cant be disabled no matter what
-
 DEFINE_CONFIG(MainConfig);
 
 // Loads the config from disk using our modInfo, then returns it for use
@@ -64,23 +62,12 @@ Logger& getLogger() {
 
 // Called at the early stages of game loading
 extern "C" void setup(ModInfo& info) {
-	std::string modId = ID;
-
-	// Thanks Laurie 👍 https://imgur.com/a/u6u0tXC
-	srand(time(0));
-	int randNo = rand() % 100;
-
-	if (randNo == 0) {
-		modId = "speedymodswapper2000omatic";
-	}
-
-	info.id = modId;
+	info.id = ID;
 	info.version = VERSION;
 	modInfo = info;
 	
 	getConfig().Load(); // Load the config file
 	getLogger().info("Completed setup!");
-	getLogger().info("super sekrit noomber: %i", randNo);
 }
 
 MAKE_HOOK_MATCH(OnSoftRestart, &GlobalNamespace::MenuTransitionsHelper::RestartGame, void, GlobalNamespace::MenuTransitionsHelper* self, System::Action_1<Zenject::DiContainer*>* finishCallback) {

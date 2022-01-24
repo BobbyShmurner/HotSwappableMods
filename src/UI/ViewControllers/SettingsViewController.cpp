@@ -108,7 +108,9 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 		hoverHintSettings->clear();
 	}
 
-	if (!firstActivation) return;
+	UpdateHoverHintSettings(getMainConfig().ShowHoverHints.GetValue());
+
+	if (!firstActivation && !ShouldClearSettingsList) return;
 
 	UnityEngine::GameObject* mainContainer = QuestUI::BeatSaberUI::CreateScrollableSettingsContainer(get_transform());
 	TMPro::TextMeshProUGUI* titleText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Settings", false);
@@ -121,6 +123,12 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 		ShouldRefreshList = true;
 	});
 	QuestUI::BeatSaberUI::AddHoverHint(alwaysShowFileNames->get_gameObject(), "When enabled, File names will always be displayed, instead of Mod IDs");
+
+	UnityEngine::UI::Toggle* promptWhenCoreModsOutdated = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Prompt When Core Mods Are Outdated", getMainConfig().PromptWhenCoreModsOutdated.GetValue(), [](bool value){
+		getMainConfig().PromptWhenCoreModsOutdated.SetValue(value);
+		ShouldRefreshList = true;
+	});
+	QuestUI::BeatSaberUI::AddHoverHint(promptWhenCoreModsOutdated->get_gameObject(), "When enabled, you will be prompted to update any outdated core mods.\nIt is recommended that you keep this setting on");
 
 	// -- Hover Hint Settings --
 
@@ -141,7 +149,7 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 		getMainConfig().ShowFileNameOnHoverHint.SetValue(value);
 		ShouldRefreshList = true;
 	});
-	hoverHintSettings->emplace_front(showFileNameOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	hoverHintSettings->push_back(showFileNameOnHoverHint->get_transform()->get_parent()->get_gameObject());
 	QuestUI::BeatSaberUI::AddHoverHint(showFileNameOnHoverHint->get_gameObject(), "When enabled, a mod's File Name will be displayed on its hover hint");
 
 	// Show Mod IDs On Hover Hints
@@ -150,7 +158,7 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 		getMainConfig().ShowModIDOnHoverHint.SetValue(value);
 		ShouldRefreshList = true;
 	});
-	hoverHintSettings->emplace_front(showModIDOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	hoverHintSettings->push_back(showModIDOnHoverHint->get_transform()->get_parent()->get_gameObject());
 	QuestUI::BeatSaberUI::AddHoverHint(showModIDOnHoverHint->get_gameObject(), "When enabled, a mod's Mod ID will be displayed on its hover hint");
 
 	// Show Mod Versions On Hover Hints
@@ -159,17 +167,8 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 		getMainConfig().ShowModVersionOnHoverHint.SetValue(value);
 		ShouldRefreshList = true;
 	});
-	hoverHintSettings->emplace_front(showModVersionOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	hoverHintSettings->push_back(showModVersionOnHoverHint->get_transform()->get_parent()->get_gameObject());
 	QuestUI::BeatSaberUI::AddHoverHint(showModVersionOnHoverHint->get_gameObject(), "When enabled, a mod's version will be displayed on its hover hint");
-
-	// Show Mod Types On Hover Hints
-
-	UnityEngine::UI::Toggle* showModTypeOnHoverHint = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Show Mod Types On Hover Hints", getMainConfig().ShowModTypeOnHoverHint.GetValue(), [](bool value){
-		getMainConfig().ShowModTypeOnHoverHint.SetValue(value);
-		ShouldRefreshList = true;
-	});
-	hoverHintSettings->emplace_front(showModTypeOnHoverHint->get_transform()->get_parent()->get_gameObject());
-	QuestUI::BeatSaberUI::AddHoverHint(showModTypeOnHoverHint->get_gameObject(), "When enabled, a mod's type will be displayed on its hover hint.\nThe 3 mod types are \"Core\", \"Library\" and \"Mod\"");
 
 	// Show Mod Errors On Hover Hints
 
@@ -177,10 +176,8 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 		getMainConfig().ShowModErrorsOnHoverHint.SetValue(value);
 		ShouldRefreshList = true;
 	});
-	hoverHintSettings->emplace_front(showModErrorsOnHoverHint->get_transform()->get_parent()->get_gameObject());
+	hoverHintSettings->push_back(showModErrorsOnHoverHint->get_transform()->get_parent()->get_gameObject());
 	QuestUI::BeatSaberUI::AddHoverHint(showModErrorsOnHoverHint->get_gameObject(), "When enabled, an error will be displayed on the hover hints of mods that failed to load that explains why the mod failed to load");
 
-	// -- Update Toggles on first activation --
-
-	UpdateHoverHintSettings(getMainConfig().ShowHoverHints.GetValue());
+	ShouldClearSettingsList = false;
 }
