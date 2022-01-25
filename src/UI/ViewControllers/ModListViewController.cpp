@@ -74,7 +74,6 @@ TMPro::TextMeshProUGUI* modText;
 TMPro::TextMeshProUGUI* noModsText;
 
 UnityEngine::UI::Button* toggleButton;
-UnityEngine::UI::Button* reloadButton;
 
 std::string GetDisplayName(QMod* qmod) {
 	if (getMainConfig().AlwaysShowFileNames.GetValue()) return qmod->FileName();
@@ -251,10 +250,10 @@ void ToggleAndRestart(UnityEngine::Transform* trans, std::vector<QMod*>* mods, b
 }
 
 void HotSwappableMods::ModListViewController::ConfirmModal(bool isReloading) {
-	std::unordered_map<std::string, QMod*>* installedModsMap = QModUtils::GetInstalledQMods();
+	std::unordered_map<std::string, QMod*> installedModsMap = QModUtils::GetInstalledMods();
 	std::vector<QMod*>* installedMods = new std::vector<QMod*>();
 
-	for (std::pair<std::string, QMod*> modPair : *installedModsMap) {
+	for (std::pair<std::string, QMod*> modPair : installedModsMap) {
 		if (!modPair.second->IsCoreMod()) installedMods->push_back(modPair.second);
 	}
 
@@ -418,22 +417,6 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 
 	if (!firstActivation) return;
 
-	// Question Mark Button
-
-	UnityEngine::UI::Button* questionButton = QuestUI::BeatSaberUI::CreateUIButton(get_transform(), "?", "ApplyButton", [&](){
-		HotSwappableMods::ModListFlowCoordinator* flowCoordinator = (HotSwappableMods::ModListFlowCoordinator*)(QuestUI::BeatSaberUI::GetMainFlowCoordinator()->YoungestChildFlowCoordinatorOrSelf());
-		flowCoordinator->PresentViewController(flowCoordinator->InfoViewController, nullptr, HMUI::ViewController::AnimationDirection::Horizontal, false);
-	});
-
-	UnityEngine::RectTransform* questionRect = questionButton->GetComponent<UnityEngine::RectTransform*>();
-	questionRect->set_anchorMax({0.9, 0.9});
-	questionRect->set_anchorMin({0.9, 0.9});
-	questionRect->set_anchoredPosition({0.5, 0.5});
-
-	questionRect->set_sizeDelta({8, 8});
-
-	questionRect->GetComponentInChildren<TMPro::TextMeshProUGUI*>()->set_alignment(TMPro::TextAlignmentOptions::Left);
-
 	// Bottom Pannel
 
 	UnityEngine::UI::HorizontalLayoutGroup* bottomPannel = QuestUI::BeatSaberUI::CreateHorizontalLayoutGroup(get_transform());
@@ -464,11 +447,17 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	});
 	toggleButton->set_interactable(false);
 
-	// Reload Button
+		// Question Mark Button
 
-	reloadButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "Reload Mods", "ApplyButton", [&](){
-		ConfirmModal(true);
+	UnityEngine::UI::Button* questionButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "?", "ApplyButton", [&](){
+		HotSwappableMods::ModListFlowCoordinator* flowCoordinator = (HotSwappableMods::ModListFlowCoordinator*)(QuestUI::BeatSaberUI::GetMainFlowCoordinator()->YoungestChildFlowCoordinatorOrSelf());
+		flowCoordinator->PresentViewController(flowCoordinator->InfoViewController, nullptr, HMUI::ViewController::AnimationDirection::Horizontal, false);
 	});
+
+	UnityEngine::RectTransform* questionRect = questionButton->GetComponent<UnityEngine::RectTransform*>();
+	
+	questionRect->set_sizeDelta({8, 8});
+	questionRect->GetComponentInChildren<TMPro::TextMeshProUGUI*>()->set_alignment(TMPro::TextAlignmentOptions::Left);
 
 	// -- In Game Downloading Test --
 

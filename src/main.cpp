@@ -1,4 +1,5 @@
 #include "main.hpp"
+#include "ModalPrompts.hpp"
 
 #include "qmod-utils/shared/QModUtils.hpp"
 
@@ -87,6 +88,7 @@ extern "C" void load() {
 
 	getLogger().info("Installing hooks...");
 	INSTALL_HOOK(getLogger(), OnSoftRestart);
+	InstallModalPromptHook(getLogger());
 	getLogger().info("Installed all hooks!");
 
 	getLogger().info("Setting Up QuestUI...");

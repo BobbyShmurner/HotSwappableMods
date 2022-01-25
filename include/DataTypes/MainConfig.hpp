@@ -8,6 +8,7 @@
 DECLARE_CONFIG(MainConfig,
     CONFIG_VALUE(AlwaysShowFileNames, bool, "AlwaysShowFileNames", false);
     CONFIG_VALUE(PromptWhenCoreModsOutdated, bool, "PromptWhenCoreModsOutdated", true);
+    CONFIG_VALUE(PromptWhenModFailsToLoad, bool, "PromptWhenModFailsToLoad", true);
 
     CONFIG_VALUE(ShowHoverHints, bool, "ShowHoverHints", true);
     CONFIG_VALUE(ShowFileNameOnHoverHint, bool, "ShowFileNameOnHoverHint", true);
@@ -18,6 +19,7 @@ DECLARE_CONFIG(MainConfig,
     CONFIG_INIT_FUNCTION(
         CONFIG_INIT_VALUE(AlwaysShowFileNames);
         CONFIG_INIT_VALUE(PromptWhenCoreModsOutdated);
+        CONFIG_INIT_VALUE(PromptWhenModFailsToLoad);
 
         CONFIG_INIT_VALUE(ShowHoverHints);
         CONFIG_INIT_VALUE(ShowFileNameOnHoverHint);

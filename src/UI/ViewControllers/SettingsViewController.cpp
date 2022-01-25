@@ -124,11 +124,20 @@ void HotSwappableMods::SettingsViewController::DidActivate(bool firstActivation,
 	});
 	QuestUI::BeatSaberUI::AddHoverHint(alwaysShowFileNames->get_gameObject(), "When enabled, File names will always be displayed, instead of Mod IDs");
 
+
+
 	UnityEngine::UI::Toggle* promptWhenCoreModsOutdated = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Prompt When Core Mods Are Outdated", getMainConfig().PromptWhenCoreModsOutdated.GetValue(), [](bool value){
 		getMainConfig().PromptWhenCoreModsOutdated.SetValue(value);
-		ShouldRefreshList = true;
 	});
-	QuestUI::BeatSaberUI::AddHoverHint(promptWhenCoreModsOutdated->get_gameObject(), "When enabled, you will be prompted to update any outdated core mods.\nIt is recommended that you keep this setting on");
+	QuestUI::BeatSaberUI::AddHoverHint(promptWhenCoreModsOutdated->get_gameObject(), "When enabled, you will be prompted to update any outdated core mods.\n\nIt is recommended that you keep this setting on");
+
+
+
+	UnityEngine::UI::Toggle* promptWhenModFailsToLoad = QuestUI::BeatSaberUI::CreateToggle(mainContainer->get_transform(), "Prompt When A Mod Fails To Load", getMainConfig().PromptWhenModFailsToLoad.GetValue(), [](bool value){
+		getMainConfig().PromptWhenModFailsToLoad.SetValue(value);
+	});
+	QuestUI::BeatSaberUI::AddHoverHint(promptWhenModFailsToLoad->get_gameObject(), "When enabled, you will be prompted to reload any mods that failed to load, which will fix the issue 99%% of of the time");
+
 
 	// -- Hover Hint Settings --
 
