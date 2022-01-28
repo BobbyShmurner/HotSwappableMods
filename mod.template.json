@@ -1,20 +1,16 @@
 {
   "_QPVersion": "0.1.1",
-  "name": "Hot-Swappable Mods",
-  "id": "HotSwappableMods",
+  "name": "${mod_name}",
+  "id": "${mod_id}",
   "author": "Bobby Shmurner",
-  "version": "0.1.0",
+  "version": "${version}",
   "packageId": "com.beatgames.beatsaber",
   "packageVersion": "1.17.1",
   "description": "Allows you to easily reload mods from in game",
   "coverImage": "cover.png",
   "dependencies": [],
-  "modFiles": [
-    "libHotSwappableMods.so"
-  ],
-  "libraryFiles": [
-    "libbeatsaber-hook_2_3_2.so"
-  ],
+  "modFiles": [],
+  "libraryFiles": [],
   "fileCopies": [],
   "copyExtensions": []
 }

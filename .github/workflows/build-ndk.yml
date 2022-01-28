@@ -76,6 +76,11 @@ jobs:
         ls -la ${GITHUB_WORKSPACE}/extern/libs
         echo cache:
         ls -la $HOME/.local/share/QPM-Rust/cache
+
+    - name: Create mod.json
+      run: |
+        chmod +x ./QPM/qpm-rust
+        ./QPM/qpm-rust qmod build --include_libs "libbeatsaber-hook_2_3_2.so" --include_libs "libHotSwappableMods.so"
         
     - name: Build Qmod
       run: |
