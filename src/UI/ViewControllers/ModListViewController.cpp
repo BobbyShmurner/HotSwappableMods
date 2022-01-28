@@ -2,6 +2,8 @@
 #include "UI/FlowCoordinators/ModListFlowCoordinator.hpp"
 
 #include "Utils/BobbyUtils.hpp"
+#include "Utils/PtrLessThan.hpp"
+
 #include "qmod-utils/shared/QModUtils.hpp"
 
 #include "DataTypes/MainConfig.hpp"
@@ -9,6 +11,7 @@
 #include "UnityEngine/RectOffset.hpp"
 #include "UnityEngine/RectTransform.hpp"
 #include "UnityEngine/Resources.hpp"
+#include "UnityEngine/Sprite.hpp"
 #include "UnityEngine/Vector2.hpp"
 #include "UnityEngine/Canvas.hpp"
 #include "UnityEngine/UI/Image.hpp"
@@ -63,7 +66,7 @@ extern std::vector<std::string> NoNoMods;
 
 DEFINE_TYPE(HotSwappableMods, ModListViewController);
 
-std::unordered_map<QMod*, bool>* modsEnabled = new std::unordered_map<QMod*, bool>();
+std::map<QMod*, bool, PtrLessThan<QMod>>* modsEnabled = new std::map<QMod*, bool, PtrLessThan<QMod>>();
 std::unordered_map<std::string, UnityEngine::UI::Toggle*>* modToggles = new std::unordered_map<std::string, UnityEngine::UI::Toggle*>();
 
 std::vector<QMod*>* modsToToggle = new std::vector<QMod*>();
@@ -74,6 +77,9 @@ TMPro::TextMeshProUGUI* modText;
 TMPro::TextMeshProUGUI* noModsText;
 
 UnityEngine::UI::Button* toggleButton;
+
+UnityEngine::Sprite* reloadSprite;
+std::string reloadSpriteBase64 = "iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFAmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDg4LCAyMDIwLzA3LzEwLTIyOjA2OjUzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDIyLTAxLTI2VDE4OjM3OjMyWiIgeG1wOk1vZGlmeURhdGU9IjIwMjItMDEtMjZUMjA6MDE6NTdaIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIyLTAxLTI2VDIwOjAxOjU3WiIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozYjBjNWY5OS1mZWFiLTVhNGUtOTExYS03MmJkNDUw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";
 
 std::string GetDisplayName(QMod* qmod) {
 	if (getMainConfig().AlwaysShowFileNames.GetValue()) return qmod->FileName();
@@ -163,17 +169,46 @@ void ClearModToggles() {
 	modsEnabled->clear();
 }
 
-int PopulateModToggles(UnityEngine::Transform* container, std::unordered_map<QMod*, bool>* mods) {
+int PopulateModToggles(UnityEngine::Transform* container, std::map<QMod*, bool, PtrLessThan<QMod>>* mods) {
 	int togglesCreated = 0;
 
-	for (std::pair<QMod*, bool> modPair : *mods) {
+	std::vector<std::pair<QMod*, bool>> orderedModPairs;
+
+	// First we want to order the toggles
+	// They will be ordered in alphabetical order, but also sectioned into 3 categories
+	//
+	// 1. Mods that failed to load
+	// 2. Enabled Mods
+	// 3. Disabled Mods
+
+	int errorCount = 0;
+	int loadedCount = 0;
+
+	for (auto modPairPtr = mods->rbegin(); modPairPtr != mods->rend(); modPairPtr++) {
+		auto modPair = *modPairPtr;
+
+		if (modPair.first->IsCoreMod()) continue;
 		if (modPair.first->Id() == "HotSwappableMods") continue;
 
-		std::string toggleName = GetDisplayName(modPair.first);
+		if (QModUtils::ModHasError(modPair.first)) {
+			orderedModPairs.insert(orderedModPairs.begin(), modPair);
+			errorCount++;
 
-		if (modPair.first->IsCoreMod()) {
 			continue;
 		}
+		
+		if (modPair.first->IsInstalled()) {
+			orderedModPairs.insert(orderedModPairs.begin() + errorCount, modPair);
+			loadedCount++;
+
+			continue;
+		}
+
+		orderedModPairs.insert(orderedModPairs.begin() + errorCount + loadedCount, modPair);
+	}
+
+	for (std::pair<QMod*, bool> modPair : orderedModPairs) {
+		std::string toggleName = GetDisplayName(modPair.first);
 		
 		CreateModToggle(container, toggleName, modPair.first, modPair.second);
 		togglesCreated++;
@@ -243,7 +278,7 @@ void ToggleAndRestart(UnityEngine::Transform* trans, std::vector<QMod*>* mods, b
 			}
 
 			getLogger().info("Finished %s, Restarting Game!", isReloading ? "Reloading" : "Toggling");
-			QModUtils::RestartGame();
+			JNIUtils::RestartApp();
 		}
 	);
 	t.detach();
@@ -392,6 +427,10 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 		// Same idea with the text
 		modText = nullptr;
 		noModsText = nullptr;
+
+		// Create the reload sprite
+		reloadSprite = BeatSaberUI::Base64ToSprite(reloadSpriteBase64);
+
 	} else {
 		if (modText != nullptr) 		{ GameObject::Destroy(modText->get_gameObject()); modText = nullptr; }
 		if (noModsText != nullptr)		{ GameObject::Destroy(noModsText->get_gameObject()); noModsText = nullptr; }
@@ -447,17 +486,30 @@ void HotSwappableMods::ModListViewController::DidActivate(bool firstActivation, 
 	});
 	toggleButton->set_interactable(false);
 
-		// Question Mark Button
+	// Reload Button
 
-	UnityEngine::UI::Button* questionButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "?", "ApplyButton", [&](){
+	UnityEngine::UI::Button* reloadButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "", "ApplyButton", [&](){
+		ConfirmModal(true);
+	});
+
+	UnityEngine::RectTransform* reloadRect = reloadButton->GetComponent<UnityEngine::RectTransform*>();
+
+	reloadRect->set_sizeDelta({8, 8});
+	
+	HMUI::ImageView* reloadImage = QuestUI::BeatSaberUI::CreateImage(reloadRect, reloadSprite, {0, 0}, {1, 1});
+	reloadImage->set_color({1, 1, 1, 0.6f});
+
+	// Info Button
+
+	UnityEngine::UI::Button* infoButton = QuestUI::BeatSaberUI::CreateUIButton(bottomPannel->get_transform(), "?", "ApplyButton", [&](){
 		HotSwappableMods::ModListFlowCoordinator* flowCoordinator = (HotSwappableMods::ModListFlowCoordinator*)(QuestUI::BeatSaberUI::GetMainFlowCoordinator()->YoungestChildFlowCoordinatorOrSelf());
 		flowCoordinator->PresentViewController(flowCoordinator->InfoViewController, nullptr, HMUI::ViewController::AnimationDirection::Horizontal, false);
 	});
 
-	UnityEngine::RectTransform* questionRect = questionButton->GetComponent<UnityEngine::RectTransform*>();
-	
-	questionRect->set_sizeDelta({8, 8});
-	questionRect->GetComponentInChildren<TMPro::TextMeshProUGUI*>()->set_alignment(TMPro::TextAlignmentOptions::Left);
+	UnityEngine::RectTransform* infoRect = infoButton->GetComponent<UnityEngine::RectTransform*>();
+
+	infoRect->set_sizeDelta({8, 8});
+	infoRect->GetComponentInChildren<TMPro::TextMeshProUGUI*>()->set_alignment(TMPro::TextAlignmentOptions::Left);
 
 	// -- In Game Downloading Test --
 

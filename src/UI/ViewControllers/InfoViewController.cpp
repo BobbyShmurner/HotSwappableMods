@@ -91,10 +91,16 @@ void HotSwappableMods::InfoViewController::DidActivate(bool firstActivation, boo
 	titleText->set_fontSize(10.0f);
 	titleText->set_alignment(TMPro::TextAlignmentOptions::Center);
 
-	TMPro::TextMeshProUGUI* descText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Each Mod may have different colored text, so to understand what each\nof them mean I've created this list which should explain what\neach color means", true);
+	TMPro::TextMeshProUGUI* reloadDescText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "The reload button allows you to reinstall each mod that is currently\nenabled. This can be useful if any of your mods break for whatever\nreason (Missing Images, Mods not Loading, etc.). So if you are ever\nfacing some odd issues with a mod or two, try reloading. There's no\nguarantee that it will fix the issue, but there's no harm in trying.", true);
 
-	descText->set_alignment(TMPro::TextAlignmentOptions::Center);
-	descText->set_lineSpacing(-40);
+	reloadDescText->set_alignment(TMPro::TextAlignmentOptions::Center);
+	reloadDescText->set_lineSpacing(-40);
+	reloadDescText->get_rectTransform()->set_sizeDelta({1, 30});
+
+	TMPro::TextMeshProUGUI* colourDescText = QuestUI::BeatSaberUI::CreateText(mainContainer->get_transform(), "Each Mod may have different colored text, so to understand what\neach of them mean I've created this list which should explain what\neach color means", true);
+
+	colourDescText->set_alignment(TMPro::TextAlignmentOptions::Center);
+	colourDescText->set_lineSpacing(-40);
 
 	// White Text
 

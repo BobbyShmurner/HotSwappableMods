@@ -166,7 +166,7 @@ custom_types::Helpers::Coroutine openDialogLater() {
 			std::thread(
 				[modsToReload] {
 					QModUtils::ReloadMods(modsToReload, nullptr);
-					QModUtils::RestartGame();
+					JNIUtils::RestartApp();
 				}
 			).detach();
 		});

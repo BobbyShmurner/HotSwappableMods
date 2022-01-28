@@ -33,8 +33,6 @@ void HotSwappableMods::ModListFlowCoordinator::BackButtonWasPressed(HMUI::ViewCo
         DismissViewController(InfoViewController, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, false);
     }
     else {
-	    ClearModsToToggle(); // This clears the mods to enable/disable list in the ModListViewController
-
         this->parentFlowCoordinator->DismissFlowCoordinator(this, HMUI::ViewController::AnimationDirection::Horizontal, nullptr, false);
     }
 }
