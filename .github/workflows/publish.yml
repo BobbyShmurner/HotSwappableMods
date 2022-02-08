@@ -103,6 +103,7 @@ jobs:
         git config user.email "<>"
 
     - name: Commit Edit Version
+    - continue-on-error: true
       run: |
         git add qpm.json
         git commit --allow-empty -m "Update Version and post restore"
