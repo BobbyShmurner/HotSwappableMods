@@ -84,7 +84,6 @@ jobs:
         echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
 
     - name: QPM Edit Version
-    - continue-on-error: true
       run: |
         ./QPM/qpm-rust package edit --version "${{ steps.get_tag_version.outputs.VERSION }}"
 
@@ -99,6 +98,7 @@ jobs:
 
     # Commit the change to the package, .vscode/c_cpp_properties.json, and Android.mk
     - name: Configure commit
+    - continue-on-error: true
       run: |
         git config user.name "Github Actions"
         git config user.email "<>"
