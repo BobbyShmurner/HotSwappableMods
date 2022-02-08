@@ -84,6 +84,7 @@ jobs:
         echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
 
     - name: QPM Edit Version
+    - continue-on-error: true
       run: |
         ./QPM/qpm-rust package edit --version "${{ steps.get_tag_version.outputs.VERSION }}"
 
