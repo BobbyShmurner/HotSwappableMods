@@ -186,3 +186,11 @@ jobs:
         asset_path: ./${{env.qmodName}}.qmod
         asset_name: ${{env.qmodName}}-v${{ steps.get_tag_version.outputs.VERSION }}.qmod
         asset_content_type: application/octet-stream
+
+    - name: Upload QMod to Mod Repo
+      uses: BobbyShmurner/mod-uploader@main
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repo-toke: ${{ secrets.REPO_TOKEN }}
+        qmod-name: ${{env.qmodName}}-v${{ steps.get_tag_version.outputs.VERSION }}.qmod
+        tag: v${{ steps.get_tag_version.outputs.VERSION }}
