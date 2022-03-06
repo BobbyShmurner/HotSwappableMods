@@ -4,7 +4,7 @@
   "info": {
     "name": "Hot-Swappable Mods",
     "id": "HotSwappableMods",
-    "version": "4.2.4",
+    "version": "5.1.1",
     "url": null,
     "additionalData": {
       "overrideSoName": "libHotSwappableMods.so"
